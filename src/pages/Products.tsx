@@ -1,22 +1,17 @@
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Plus, Search, MoreHorizontal, Download, Trash } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Plus, Search, Download, Trash } from "lucide-react";
+import { toast } from "sonner";
+import { ProductTable } from "@/components/products/ProductTable";
+import { ProductForm } from "@/components/products/ProductForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Pagination,
   PaginationContent,
@@ -25,7 +20,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { toast } from "sonner";
 
 // Mock data for initial development
 const mockProducts = [
@@ -62,10 +56,7 @@ export function Products() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState<{
-    key: string;
-    direction: "asc" | "desc";
-  } | null>(null);
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
 
   const itemsPerPage = 10;
   const totalPages = Math.ceil(mockProducts.length / itemsPerPage);
@@ -77,32 +68,11 @@ export function Products() {
       product.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Sort products
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (!sortConfig) return 0;
-
-    const aValue = a[sortConfig.key as keyof typeof a];
-    const bValue = b[sortConfig.key as keyof typeof b];
-
-    if (sortConfig.direction === "asc") {
-      return aValue > bValue ? 1 : -1;
-    }
-    return aValue < bValue ? 1 : -1;
-  });
-
   // Get current page items
-  const currentProducts = sortedProducts.slice(
+  const currentProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  const handleSort = (key: string) => {
-    setSortConfig((current) => ({
-      key,
-      direction:
-        current?.key === key && current.direction === "asc" ? "desc" : "asc",
-    }));
-  };
 
   const handleSelectAll = () => {
     if (selectedProducts.length === currentProducts.length) {
@@ -150,10 +120,20 @@ export function Products() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-semibold">Products</h1>
-        <Button>
-          <Plus className="mr-2" />
-          Add Product
-        </Button>
+        <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2" />
+              Add Product
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Add New Product</DialogTitle>
+            </DialogHeader>
+            <ProductForm />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="flex items-center justify-between gap-4">
@@ -191,108 +171,12 @@ export function Products() {
       </div>
 
       <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">
-                <Checkbox
-                  checked={
-                    currentProducts.length > 0 &&
-                    selectedProducts.length === currentProducts.length
-                  }
-                  onCheckedChange={handleSelectAll}
-                  aria-label="Select all products"
-                />
-              </TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => handleSort("name")}
-              >
-                Name
-              </TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => handleSort("sku")}
-              >
-                SKU
-              </TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => handleSort("price")}
-              >
-                Price
-              </TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => handleSort("stock")}
-              >
-                Stock
-              </TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => handleSort("category")}
-              >
-                Category
-              </TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => handleSort("status")}
-              >
-                Status
-              </TableHead>
-              <TableHead className="w-12"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {currentProducts.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell>
-                  <Checkbox
-                    checked={selectedProducts.includes(product.id)}
-                    onCheckedChange={() => handleSelectProduct(product.id)}
-                    aria-label={`Select ${product.name}`}
-                  />
-                </TableCell>
-                <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell>{product.sku}</TableCell>
-                <TableCell>${product.price.toFixed(2)}</TableCell>
-                <TableCell>{product.stock}</TableCell>
-                <TableCell>{product.category}</TableCell>
-                <TableCell>
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                      product.status === "Low Stock"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-green-100 text-green-700"
-                    }`}
-                  >
-                    {product.status}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 p-0"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <ProductTable
+          products={currentProducts}
+          selectedProducts={selectedProducts}
+          onSelectProduct={handleSelectProduct}
+          onSelectAll={handleSelectAll}
+        />
       </div>
 
       <Pagination>
