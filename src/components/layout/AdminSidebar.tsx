@@ -69,16 +69,16 @@ const menuItems = [
 
 export function AdminSidebar() {
   return (
-    <Sidebar>
-      <div className="p-4">
-        <h1 className="text-xl font-semibold">Admin Panel</h1>
+    <Sidebar >
+      <div className="p-4 bg-gray-50">
+        <h1 className="text-xl font-semibold">Naayaab (Admin Panel)</h1>
       </div>
-      <SidebarContent>
+      <SidebarContent className="bg-gray-50">
         {menuItems.map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu >
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>

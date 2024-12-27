@@ -142,7 +142,7 @@ export function ProductTable({
                     variant="ghost"
                     size="icon"
                     onClick={() => onPreviewProduct?.(product)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    // className="opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <Eye className="h-4 w-4" />
                     <span className="sr-only">Preview {product.name}</span>
@@ -152,10 +152,9 @@ export function ProductTable({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        // className="opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
