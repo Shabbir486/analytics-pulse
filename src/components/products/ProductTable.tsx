@@ -2,7 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { Product } from "@/types/product";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -13,7 +13,6 @@ interface ProductTableProps {
   selectedProducts: number[];
   onSelectProduct: (productId: number) => void;
   onSelectAll: () => void;
-  onPreviewProduct: (product: Product) => void;
   columnVisibility?: ColumnVisibility;
 }
 
@@ -22,7 +21,6 @@ export function ProductTable({
   selectedProducts, 
   onSelectProduct, 
   onSelectAll,
-  onPreviewProduct,
   columnVisibility = {
     product: true,
     createAt: true,
@@ -121,33 +119,22 @@ export function ProductTable({
                 </TableCell>
               )}
               <TableCell>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onPreviewProduct(product)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Eye className="h-4 w-4" />
-                    <span className="sr-only">Preview product</span>
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           );
