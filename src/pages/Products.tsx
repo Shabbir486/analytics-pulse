@@ -5,6 +5,8 @@ import { Plus, Search, Download, Trash, Eye, ChevronLeft, ChevronRight } from "l
 import { toast } from "sonner";
 import { ProductTable } from "@/components/products/ProductTable";
 import { ProductForm } from "@/components/products/ProductForm";
+import { ProductImagePreview } from "@/components/products/ProductImagePreview";
+import { Product } from "@/types/product";
 import {
   Dialog,
   DialogContent,
@@ -88,6 +90,8 @@ export function Products() {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [stockFilter, setStockFilter] = useState<string>("all");
   const [publishFilter, setPublishFilter] = useState<string>("all");
+  const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const itemsPerPage = 10;
 
@@ -155,6 +159,11 @@ export function Products() {
     link.click();
     document.body.removeChild(link);
     toast.success("Products exported successfully");
+  };
+
+  const handlePreviewProduct = (product: Product) => {
+    setPreviewProduct(product);
+    setIsPreviewOpen(true);
   };
 
   return (
@@ -262,8 +271,15 @@ export function Products() {
           selectedProducts={selectedProducts}
           onSelectProduct={handleSelectProduct}
           onSelectAll={handleSelectAll}
+          onPreviewProduct={handlePreviewProduct}
         />
       </div>
+
+      <ProductImagePreview
+        product={previewProduct}
+        open={isPreviewOpen}
+        onOpenChange={setIsPreviewOpen}
+      />
 
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">

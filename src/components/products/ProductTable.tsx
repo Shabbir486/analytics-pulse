@@ -2,7 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Eye } from "lucide-react";
 import { Product } from "@/types/product";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -12,9 +12,16 @@ interface ProductTableProps {
   selectedProducts: number[];
   onSelectProduct: (productId: number) => void;
   onSelectAll: () => void;
+  onPreviewProduct: (product: Product) => void;
 }
 
-export function ProductTable({ products, selectedProducts, onSelectProduct, onSelectAll }: ProductTableProps) {
+export function ProductTable({ 
+  products, 
+  selectedProducts, 
+  onSelectProduct, 
+  onSelectAll,
+  onPreviewProduct 
+}: ProductTableProps) {
   const getStockStatus = (product: Product) => {
     if (product.stock === 0) return { label: "Out of stock", variant: "destructive" as const };
     if (product.stock <= product.reorderThreshold) return { label: "Low stock", variant: "warning" as const };
@@ -95,22 +102,33 @@ export function ProductTable({ products, selectedProducts, onSelectProduct, onSe
                 </Badge>
               </TableCell>
               <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Open menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onPreviewProduct(product)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Eye className="h-4 w-4" />
+                    <span className="sr-only">Preview product</span>
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </TableCell>
             </TableRow>
           );
