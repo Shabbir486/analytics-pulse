@@ -1,26 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Download, Trash, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, Download, Trash, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { ProductTable } from "@/components/products/ProductTable";
 import { ProductForm } from "@/components/products/ProductForm";
 import { ProductImagePreview } from "@/components/products/ProductImagePreview";
 import { Product } from "@/types/product";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ProductColumnsSelector, type ColumnVisibility } from "@/components/products/ProductColumnsSelector";
+import { ProductFilters } from "@/components/products/ProductFilters";
 
 // Mock data updated to match the design
 const mockProducts = [
@@ -92,6 +82,13 @@ export function Products() {
   const [publishFilter, setPublishFilter] = useState<string>("all");
   const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
+    product: true,
+    createAt: true,
+    stock: true,
+    price: true,
+    status: true,
+  });
 
   const itemsPerPage = 10;
 
@@ -166,6 +163,23 @@ export function Products() {
     setIsPreviewOpen(true);
   };
 
+  const handleColumnChange = (column: keyof ColumnVisibility) => {
+    setColumnVisibility(prev => ({
+      ...prev,
+      [column]: !prev[column]
+    }));
+  };
+
+  const handleResetColumns = () => {
+    setColumnVisibility({
+      product: true,
+      createAt: true,
+      stock: true,
+      price: true,
+      status: true,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -232,9 +246,12 @@ export function Products() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Button variant="outline" size="icon">
-              <Eye className="h-4 w-4" />
-            </Button>
+            <ProductColumnsSelector
+              columns={columnVisibility}
+              onColumnChange={handleColumnChange}
+              onReset={handleResetColumns}
+            />
+            <ProductFilters />
             <Button variant="outline" size="icon">
               <Download className="h-4 w-4" />
             </Button>
@@ -272,6 +289,7 @@ export function Products() {
           onSelectProduct={handleSelectProduct}
           onSelectAll={handleSelectAll}
           onPreviewProduct={handlePreviewProduct}
+          columnVisibility={columnVisibility}
         />
       </div>
 

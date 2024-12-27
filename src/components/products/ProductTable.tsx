@@ -6,6 +6,7 @@ import { MoreHorizontal, Eye } from "lucide-react";
 import { Product } from "@/types/product";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { ColumnVisibility } from "./ProductColumnsSelector";
 
 interface ProductTableProps {
   products: Product[];
@@ -13,6 +14,7 @@ interface ProductTableProps {
   onSelectProduct: (productId: number) => void;
   onSelectAll: () => void;
   onPreviewProduct: (product: Product) => void;
+  columnVisibility?: ColumnVisibility;
 }
 
 export function ProductTable({ 
@@ -20,7 +22,14 @@ export function ProductTable({
   selectedProducts, 
   onSelectProduct, 
   onSelectAll,
-  onPreviewProduct 
+  onPreviewProduct,
+  columnVisibility = {
+    product: true,
+    createAt: true,
+    stock: true,
+    price: true,
+    status: true,
+  }
 }: ProductTableProps) {
   const getStockStatus = (product: Product) => {
     if (product.stock === 0) return { label: "Out of stock", variant: "destructive" as const };
@@ -39,11 +48,11 @@ export function ProductTable({
               aria-label="Select all products"
             />
           </TableHead>
-          <TableHead>Product</TableHead>
-          <TableHead>Create at</TableHead>
-          <TableHead>Stock</TableHead>
-          <TableHead>Price</TableHead>
-          <TableHead>Status</TableHead>
+          {columnVisibility.product && <TableHead>Product</TableHead>}
+          {columnVisibility.createAt && <TableHead>Create at</TableHead>}
+          {columnVisibility.stock && <TableHead>Stock</TableHead>}
+          {columnVisibility.price && <TableHead>Price</TableHead>}
+          {columnVisibility.status && <TableHead>Status</TableHead>}
           <TableHead className="w-12"></TableHead>
         </TableRow>
       </TableHeader>
@@ -59,48 +68,58 @@ export function ProductTable({
                   aria-label={`Select ${product.name}`}
                 />
               </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-12 h-12 rounded-lg object-cover"
-                  />
-                  <div>
-                    <div className="font-medium">{product.name}</div>
-                    <div className="text-sm text-muted-foreground">{product.category}</div>
+              {columnVisibility.product && (
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-12 h-12 rounded-lg object-cover"
+                    />
+                    <div>
+                      <div className="font-medium">{product.name}</div>
+                      <div className="text-sm text-muted-foreground">{product.category}</div>
+                    </div>
                   </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="text-sm">
-                  {format(new Date(product.createdAt), "dd MMM yyyy")}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {format(new Date(product.createdAt), "hh:mm a")}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge 
-                  variant={stockStatus.variant}
-                  className="font-normal"
-                >
-                  {stockStatus.label}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <div className="font-medium">
-                  ${product.price.toFixed(2)}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge 
-                  variant={product.status === "Published" ? "default" : "secondary"}
-                  className="font-normal"
-                >
-                  {product.status}
-                </Badge>
-              </TableCell>
+                </TableCell>
+              )}
+              {columnVisibility.createAt && (
+                <TableCell>
+                  <div className="text-sm">
+                    {format(new Date(product.createdAt), "dd MMM yyyy")}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {format(new Date(product.createdAt), "hh:mm a")}
+                  </div>
+                </TableCell>
+              )}
+              {columnVisibility.stock && (
+                <TableCell>
+                  <Badge 
+                    variant={stockStatus.variant}
+                    className="font-normal"
+                  >
+                    {stockStatus.label}
+                  </Badge>
+                </TableCell>
+              )}
+              {columnVisibility.price && (
+                <TableCell>
+                  <div className="font-medium">
+                    ${product.price.toFixed(2)}
+                  </div>
+                </TableCell>
+              )}
+              {columnVisibility.status && (
+                <TableCell>
+                  <Badge 
+                    variant={product.status === "Published" ? "default" : "secondary"}
+                    className="font-normal"
+                  >
+                    {product.status}
+                  </Badge>
+                </TableCell>
+              )}
               <TableCell>
                 <div className="flex items-center gap-2">
                   <Button
