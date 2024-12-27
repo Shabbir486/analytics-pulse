@@ -37,6 +37,18 @@ export function ProductTable({
     return { label: `${product.stock} in stock`, variant: "success" as const };
   };
 
+  const handleRowClick = (product: Product, event: React.MouseEvent) => {
+    // Prevent row click if clicking on checkbox or dropdown
+    const target = event.target as HTMLElement;
+    if (
+      target.closest('button') || 
+      target.closest('input[type="checkbox"]')
+    ) {
+      return;
+    }
+    onPreviewProduct?.(product);
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -60,8 +72,12 @@ export function ProductTable({
         {products.map((product) => {
           const stockStatus = getStockStatus(product);
           return (
-            <TableRow key={product.id} className="group">
-              <TableCell>
+            <TableRow 
+              key={product.id} 
+              className="group cursor-pointer"
+              onClick={(e) => handleRowClick(product, e)}
+            >
+              <TableCell onClick={(e) => e.stopPropagation()}>
                 <Checkbox
                   checked={selectedProducts.includes(product.id)}
                   onCheckedChange={() => onSelectProduct(product.id)}
@@ -120,7 +136,7 @@ export function ProductTable({
                   </Badge>
                 </TableCell>
               )}
-              <TableCell>
+              <TableCell onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
