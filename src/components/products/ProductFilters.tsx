@@ -25,7 +25,8 @@ export type FilterOperator =
   | "ends with"
   | "is empty"
   | "is not empty"
-  | "is any of";
+  | "is any of"
+  | "";
 
 export interface ProductFilter {
   column: string;
@@ -40,7 +41,7 @@ interface ProductFiltersProps {
 
 export function ProductFilters({ onFilterChange, activeFilter }: ProductFiltersProps) {
   const [column, setColumn] = useState<string>(activeFilter?.column || "");
-  const [operator, setOperator] = useState<FilterOperator>(activeFilter?.operator || "equals");
+  const [operator, setOperator] = useState<FilterOperator>(activeFilter?.operator || "");
   const [value, setValue] = useState<string>(activeFilter?.value || "");
 
   const columns = [
@@ -71,7 +72,7 @@ export function ProductFilters({ onFilterChange, activeFilter }: ProductFiltersP
 
   const handleClearFilter = () => {
     setColumn("");
-    setOperator("equals");
+    setOperator("");
     setValue("");
     onFilterChange(null);
   };

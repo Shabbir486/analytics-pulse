@@ -7,6 +7,7 @@ import { Product } from "@/types/product";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ColumnVisibility } from "./ProductColumnsSelector";
+import { ProductImagePreview } from "./ProductImagePreview";
 
 interface ProductTableProps {
   products: Product[];
@@ -39,6 +40,7 @@ export function ProductTable({
 
   const handleRowClick = (product: Product, event: React.MouseEvent) => {
     // Prevent row click if clicking on checkbox or dropdown
+    let open=true;
     const target = event.target as HTMLElement;
     if (
       target.closest('button') || 
@@ -47,6 +49,9 @@ export function ProductTable({
       return;
     }
     onPreviewProduct?.(product);
+    return <>
+    <ProductImagePreview product={product} open={open} onOpenChange={() => { open = false; }} />
+    </>
   };
 
   return (
@@ -87,11 +92,6 @@ export function ProductTable({
               {columnVisibility.product && (
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-12 h-12 rounded-lg object-cover"
-                    />
                     <div>
                       <div className="font-medium">{product.name}</div>
                       <div className="text-sm text-muted-foreground">{product.category}</div>
