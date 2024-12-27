@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/carousel";
 import { Product } from "@/types/product";
 import { useState } from "react";
+import { type CarouselApi } from "@/components/ui/carousel";
 
 interface ProductImageCarouselProps {
   product: Product;
@@ -14,6 +15,7 @@ interface ProductImageCarouselProps {
 
 export function ProductImageCarousel({ product }: ProductImageCarouselProps) {
   const [currentSlide, setCurrentSlide] = useState(1);
+  const [api, setApi] = useState<CarouselApi>();
   
   // Mock multiple images for demonstration
   const productImages = [
@@ -23,9 +25,19 @@ export function ProductImageCarousel({ product }: ProductImageCarouselProps) {
     "/lovable-uploads/aefb88e5-9912-4de1-926c-1f4643ecffe5.png",
   ];
 
+  // Handle carousel selection
+  const onSelect = () => {
+    if (!api) return;
+    setCurrentSlide(api.selectedScrollSnap() + 1);
+  };
+
   return (
     <div className="relative">
-      <Carousel className="w-full" onSelect={(index) => setCurrentSlide(index + 1)}>
+      <Carousel 
+        className="w-full" 
+        setApi={setApi}
+        onSelect={onSelect}
+      >
         <CarouselContent>
           {productImages.map((image, index) => (
             <CarouselItem key={index}>
