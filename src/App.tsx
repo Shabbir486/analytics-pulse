@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AdminLayout } from "./components/layout/AdminLayout";
 import { Products } from "./pages/Products";
+import { ProductView } from "./pages/ProductView";
 import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ function App() {
             <Route path="/" element={<AdminLayout />}>
               <Route index element={<Index />} />
               <Route path="products" element={<Products />} />
+              <Route path="products/:id" element={<ProductView />} />
             </Route>
           </Routes>
         </BrowserRouter>
