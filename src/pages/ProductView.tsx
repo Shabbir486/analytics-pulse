@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, Share, Scale, ChevronDown, Plus, Minus } from "lucide-react";
 import { useState } from "react";
-import { ProductImageCarousel } from "@/components/products/ProductImageCarousel";
 import { Product } from "@/types/product";
+import { ProductSpecifications } from "@/components/products/ProductSpecifications";
 
 // Mock function to fetch product - replace with actual data fetching
 const getProduct = (id: string): Product | null => {
@@ -37,6 +37,7 @@ export function ProductView() {
   const navigate = useNavigate();
   const [selectedColor, setSelectedColor] = useState<'red' | 'blue'>('red');
   const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
 
   const product = getProduct(id || "");
 
@@ -49,6 +50,14 @@ export function ProductView() {
     if (product.stock <= product.reorderThreshold) return { label: "LOW STOCK", variant: "warning" as const };
     return { label: `IN STOCK`, variant: "success" as const };
   };
+
+  // Mock multiple images for demonstration
+  const productImages = [
+    product.image,
+    "/lovable-uploads/0abfa0b3-7f64-4661-a4d4-52cf395f1d90.png",
+    "/lovable-uploads/1d7ff204-1f12-485d-807f-06cde4656bfe.png",
+    "/lovable-uploads/aefb88e5-9912-4de1-926c-1f4643ecffe5.png",
+  ];
 
   const stockStatus = getStockStatus(product);
   const isOutOfStock = product.stock === 0;
@@ -64,7 +73,32 @@ export function ProductView() {
       </Button>
       
       <div className="grid lg:grid-cols-2 gap-8">
-        <ProductImageCarousel product={product} />
+        <div className="space-y-4">
+          <div className="aspect-square overflow-hidden rounded-lg">
+            <img
+              src={productImages[selectedImage]}
+              alt={`${product.name} - View ${selectedImage + 1}`}
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <div className="grid grid-cols-4 gap-4">
+            {productImages.map((image, index) => (
+              <button
+                key={index}
+                onClick={() => setSelectedImage(index)}
+                className={`aspect-square overflow-hidden rounded-lg border-2 ${
+                  selectedImage === index ? 'border-primary' : 'border-transparent'
+                }`}
+              >
+                <img
+                  src={image}
+                  alt={`${product.name} - Thumbnail ${index + 1}`}
+                  className="h-full w-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
         
         <div className="space-y-6">
           <div>
@@ -186,6 +220,8 @@ export function ProductView() {
           </div>
         </div>
       </div>
+
+      <ProductSpecifications product={product} />
     </div>
   );
 }
