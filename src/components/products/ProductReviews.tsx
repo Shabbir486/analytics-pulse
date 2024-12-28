@@ -1,4 +1,4 @@
-import { Star, ThumbsUp, ThumbsDown, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, ThumbsUp, ThumbsDown, MessageCircle } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +10,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useState } from "react";
 
 interface Review {
   id: number;
@@ -25,25 +26,34 @@ interface Review {
   dislikes: number;
 }
 
-const mockReviews: Review[] = [
-  {
-    id: 1,
-    user: {
-      name: "Sarah Wilson",
-      avatar: "/lovable-uploads/0abfa0b3-7f64-4661-a4d4-52cf395f1d90.png"
-    },
-    date: "25 June 2024",
-    rating: 4,
-    comment: "Great product! The fit was perfect and the quality exceeded my expectations. I've been wearing them for a month now and they still look brand new.",
-    images: [
-      "/lovable-uploads/1d7ff204-1f12-485d-807f-06cde4656bfe.png",
-      "/lovable-uploads/aefb88e5-9912-4de1-926c-1f4643ecffe5.png"
-    ],
-    likes: 24,
-    dislikes: 2
-  },
-  // ... Add more mock reviews as needed
-];
+// Generate 20 mock reviews
+const generateMockReviews = (): Review[] => {
+  const reviews: Review[] = [];
+  const avatars = [
+    "/lovable-uploads/0abfa0b3-7f64-4661-a4d4-52cf395f1d90.png",
+    "/lovable-uploads/1d7ff204-1f12-485d-807f-06cde4656bfe.png",
+    "/lovable-uploads/aefb88e5-9912-4de1-926c-1f4643ecffe5.png"
+  ];
+  
+  for (let i = 1; i <= 20; i++) {
+    reviews.push({
+      id: i,
+      user: {
+        name: `User ${i}`,
+        avatar: avatars[i % avatars.length]
+      },
+      date: "25 June 2024",
+      rating: Math.floor(Math.random() * 5) + 1,
+      comment: `This is review number ${i}. The product is great and meets all expectations.`,
+      images: i % 3 === 0 ? [avatars[0], avatars[1]] : undefined,
+      likes: Math.floor(Math.random() * 50),
+      dislikes: Math.floor(Math.random() * 10)
+    });
+  }
+  return reviews;
+};
+
+const mockReviews = generateMockReviews();
 
 const ratingDistribution = {
   5: 25.0,
@@ -54,6 +64,15 @@ const ratingDistribution = {
 };
 
 export function ProductReviews() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const reviewsPerPage = 10;
+  
+  // Calculate pagination
+  const indexOfLastReview = currentPage * reviewsPerPage;
+  const indexOfFirstReview = indexOfLastReview - reviewsPerPage;
+  const currentReviews = mockReviews.slice(indexOfFirstReview, indexOfLastReview);
+  const totalPages = Math.ceil(mockReviews.length / reviewsPerPage);
+
   return (
     <div className="space-y-8">
       <div className="grid md:grid-cols-2 gap-8">
@@ -74,7 +93,7 @@ export function ProductReviews() {
               />
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Based on 10 reviews</p>
+          <p className="text-sm text-muted-foreground">Based on {mockReviews.length} reviews</p>
         </div>
         
         <div className="space-y-2">
@@ -100,11 +119,11 @@ export function ProductReviews() {
       </div>
 
       <div className="space-y-6">
-        {mockReviews.map((review) => (
+        {currentReviews.map((review) => (
           <div key={review.id} className="border-b pb-6">
             <div className="flex items-start gap-4">
               <Avatar className="h-10 w-10">
-                <img src={review.avatar} alt={review.user.name} />
+                <img src={review.user.avatar} alt={review.user.name} />
               </Avatar>
               <div className="flex-1">
                 <div className="flex justify-between">
@@ -161,22 +180,26 @@ export function ProductReviews() {
       <Pagination>
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious href="#" />
+            <PaginationPrevious 
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+            />
           </PaginationItem>
+          {[...Array(totalPages)].map((_, i) => (
+            <PaginationItem key={i}>
+              <PaginationLink 
+                onClick={() => setCurrentPage(i + 1)}
+                isActive={currentPage === i + 1}
+              >
+                {i + 1}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
           <PaginationItem>
-            <PaginationLink href="#" isActive>1</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">2</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">3</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext href="#" />
+            <PaginationNext 
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+            />
           </PaginationItem>
         </PaginationContent>
       </Pagination>
