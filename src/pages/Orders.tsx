@@ -1,7 +1,49 @@
 import { useState } from "react";
 import { OrdersTable } from "@/components/orders/OrdersTable";
 import { OrdersHeader } from "@/components/orders/OrdersHeader";
-import { OrderStatus } from "@/types/order";
+import { Order, OrderStatus } from "@/types/order";
+
+// Generate 20 mock orders
+const generateMockOrders = (): Order[] => {
+  const statuses: OrderStatus[] = ['pending', 'completed', 'cancelled', 'refunded'];
+  const orders: Order[] = [];
+  
+  for (let i = 1; i <= 20; i++) {
+    orders.push({
+      id: `#${String(i).padStart(5, '0')}`,
+      customer: {
+        name: `Customer ${i}`,
+        email: `customer${i}@example.com`,
+        avatar: "/lovable-uploads/avatar.png"
+      },
+      date: new Date(2024, 0, i).toISOString(),
+      items: [
+        {
+          id: `item-${i}-1`,
+          image: "/lovable-uploads/mock-image.png",
+          name: "Product A",
+          quantity: Math.floor(Math.random() * 3) + 1,
+          price: 79.99,
+          sku: "SKU001"
+        },
+        {
+          id: `item-${i}-2`,
+          image: "/lovable-uploads/mock-image.png",
+          name: "Product B",
+          quantity: Math.floor(Math.random() * 2) + 1,
+          price: 129.99,
+          sku: "SKU002"
+        }
+      ],
+      totalPrice: 299.97,
+      status: statuses[Math.floor(Math.random() * statuses.length)]
+    });
+  }
+  
+  return orders;
+};
+
+const mockOrders = generateMockOrders();
 
 export function Orders() {
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | 'all'>('all');
@@ -22,12 +64,14 @@ export function Orders() {
         onSearchChange={setSearchQuery}
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
+        mockOrders={mockOrders}
       />
       
       <OrdersTable
         statusFilter={selectedStatus}
         searchQuery={searchQuery}
         dateRange={dateRange}
+        mockOrders={mockOrders}
       />
     </div>
   );

@@ -6,7 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { OrderStatus } from "@/types/order";
+import { Order, OrderStatus } from "@/types/order";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -18,15 +18,8 @@ interface OrdersHeaderProps {
   onSearchChange: (query: string) => void;
   dateRange: { from: Date | undefined; to: Date | undefined };
   onDateRangeChange: (range: { from: Date | undefined; to: Date | undefined }) => void;
+  mockOrders: Order[];
 }
-
-const statuses: { value: OrderStatus | 'all'; label: string; count: number }[] = [
-  { value: 'all', label: 'All', count: 20 },
-  { value: 'pending', label: 'Pending', count: 6 },
-  { value: 'completed', label: 'Completed', count: 10 },
-  { value: 'cancelled', label: 'Cancelled', count: 2 },
-  { value: 'refunded', label: 'Refunded', count: 2 },
-];
 
 export function OrdersHeader({
   selectedStatus,
@@ -35,7 +28,15 @@ export function OrdersHeader({
   onSearchChange,
   dateRange,
   onDateRangeChange,
+  mockOrders
 }: OrdersHeaderProps) {
+  const statuses: { value: OrderStatus | 'all'; label: string; count: number }[] = [
+    { value: 'all', label: 'All', count: mockOrders.length },
+    { value: 'pending', label: 'Pending', count: mockOrders.filter(order => order.status === 'pending').length },
+    { value: 'completed', label: 'Completed', count: mockOrders.filter(order => order.status === 'completed').length },
+    { value: 'cancelled', label: 'Cancelled', count: mockOrders.filter(order => order.status === 'cancelled').length },
+    { value: 'refunded', label: 'Refunded', count: mockOrders.filter(order => order.status === 'refunded').length },
+  ];
   return (
     <div className="space-y-4">
       <div className="flex gap-2 border-b">

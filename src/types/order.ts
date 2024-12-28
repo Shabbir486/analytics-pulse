@@ -1,6 +1,7 @@
 export type OrderStatus = 'pending' | 'completed' | 'cancelled' | 'refunded';
 
 export interface OrderItem {
+  image: string;
   id: string;
   name: string;
   quantity: number;

@@ -36,7 +36,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
     }
   }, [initialData, reset]);
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: { name: string; sku: string; description: string; price: string; stock: string; category: string; }) => {
     console.log("Form data:", data);
     toast.success("Product saved successfully");
   };

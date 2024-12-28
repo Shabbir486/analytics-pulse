@@ -28,62 +28,24 @@ import { Order, OrderStatus } from "@/types/order";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 
-// Generate 20 mock orders
-const generateMockOrders = (): Order[] => {
-  const statuses: OrderStatus[] = ['pending', 'completed', 'cancelled', 'refunded'];
-  const orders: Order[] = [];
-  
-  for (let i = 1; i <= 20; i++) {
-    orders.push({
-      id: `#${String(i).padStart(5, '0')}`,
-      customer: {
-        name: `Customer ${i}`,
-        email: `customer${i}@example.com`,
-        avatar: "/lovable-uploads/0abfa0b3-7f64-4661-a4d4-52cf395f1d90.png"
-      },
-      date: new Date(2024, 0, i).toISOString(),
-      items: [
-        {
-          id: `item-${i}-1`,
-          name: "Product A",
-          quantity: Math.floor(Math.random() * 3) + 1,
-          price: 79.99,
-          sku: "SKU001"
-        },
-        {
-          id: `item-${i}-2`,
-          name: "Product B",
-          quantity: Math.floor(Math.random() * 2) + 1,
-          price: 129.99,
-          sku: "SKU002"
-        }
-      ],
-      totalPrice: 299.97,
-      status: statuses[Math.floor(Math.random() * statuses.length)]
-    });
-  }
-  
-  return orders;
-};
-
-const mockOrders = generateMockOrders();
-
 interface OrdersTableProps {
-  statusFilter: OrderStatus | 'all';
+  statusFilter: OrderStatus | "all";
   searchQuery: string;
   dateRange: { from: Date | undefined; to: Date | undefined };
+  mockOrders: Order[];
 }
 
 export function OrdersTable({
   statusFilter,
   searchQuery,
   dateRange,
+  mockOrders,
 }: OrdersTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isDense, setIsDense] = useState(false);
-  
+
   const toggleRow = (orderId: string) => {
     const newExpandedRows = new Set(expandedRows);
     if (expandedRows.has(orderId)) {
@@ -93,38 +55,41 @@ export function OrdersTable({
     }
     setExpandedRows(newExpandedRows);
   };
-  
+
   // Filter orders based on status, search query, and date range
   const filteredOrders = mockOrders.filter((order) => {
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-    const matchesSearch = 
+    const matchesStatus =
+      statusFilter === "all" || order.status === statusFilter;
+    const matchesSearch =
       order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.customer.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDate = 
-      !dateRange.from || !dateRange.to ||
-      (new Date(order.date) >= dateRange.from && new Date(order.date) <= dateRange.to);
-    
+    const matchesDate =
+      !dateRange.from ||
+      !dateRange.to ||
+      (new Date(order.date) >= dateRange.from &&
+        new Date(order.date) <= dateRange.to);
+
     return matchesStatus && matchesSearch && matchesDate;
   });
-  
+
   // Calculate pagination
   const totalPages = Math.ceil(filteredOrders.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const currentOrders = filteredOrders.slice(startIndex, endIndex);
-  
+
   const getStatusBadgeVariant = (status: OrderStatus) => {
     switch (status) {
-      case 'completed':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'cancelled':
-        return 'destructive';
-      case 'refunded':
-        return 'secondary';
+      case "completed":
+        return "success";
+      case "pending":
+        return "warning";
+      case "cancelled":
+        return "destructive";
+      case "refunded":
+        return "secondary";
       default:
-        return 'default';
+        return "default";
     }
   };
 
@@ -136,7 +101,7 @@ export function OrdersTable({
           size="sm"
           onClick={() => setIsDense(!isDense)}
         >
-          {isDense ? "Regular view" : "Dense view"}
+          {isDense ? "Dense view" : "Regular view"}
         </Button>
       </div>
       
@@ -156,10 +121,7 @@ export function OrdersTable({
           <TableBody>
             {currentOrders.map((order) => (
               <>
-                <TableRow
-                  key={order.id}
-                  className={isDense ? "h-12" : ""}
-                >
+                <TableRow key={order.id} className={isDense ? "h-12" : "h-20"}>
                   <TableCell>
                     <Button
                       variant="ghost"
@@ -177,7 +139,10 @@ export function OrdersTable({
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Avatar className="h-6 w-6">
-                        <img src={order.customer.avatar} alt={order.customer.name} />
+                        <img
+                          src={order.customer.avatar}
+                          alt={order.customer.name}
+                        />
                       </Avatar>
                       <div className="flex flex-col">
                         <span>{order.customer.name}</span>
@@ -200,27 +165,30 @@ export function OrdersTable({
                 </TableRow>
                 {expandedRows.has(order.id) && (
                   <TableRow>
-                    <TableCell colSpan={7}>
-                      <div className="p-4 bg-muted/50">
-                        <h4 className="font-medium mb-2">Order Items</h4>
-                        <div className="space-y-2">
+                    <TableCell colSpan={12} className="bg-muted/50 p-2">
+                        <div className="space-y-1">
                           {order.items.map((item) => (
                             <div
                               key={item.id}
-                              className="flex justify-between items-center"
+                              className="bg-card rounded-sm shadow-md p-2 flex items-center justify-between"
                             >
-                              <div>
+                              <img
+                                src={item.image}
+                                alt="Urban Explorer Sneakers"
+                                className="rounded-lg mr-4 w-16"
+                              />
+                              <div className=" flex flex-col min-w-10 justify-start w-full">
                                 <span className="font-medium">{item.name}</span>
-                                <span className="text-sm text-muted-foreground ml-2">
+                                <span className="text-sm text-muted-foreground">
                                   (SKU: {item.sku})
                                 </span>
                               </div>
-                              <div className="text-sm">
-                                {item.quantity} x ${item.price.toFixed(2)}
+                              <p className="w-24"> x{item.quantity}</p>
+                              <div className=" text-sm text-right w-24">
+                                ${item.price.toFixed(2)}
                               </div>
                             </div>
                           ))}
-                        </div>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -230,7 +198,7 @@ export function OrdersTable({
           </TableBody>
         </Table>
       </div>
-      
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Rows per page</span>
@@ -252,13 +220,15 @@ export function OrdersTable({
             </SelectContent>
           </Select>
         </div>
-        
+
         <Pagination>
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                className={
+                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                }
               />
             </PaginationItem>
             {[...Array(totalPages)].map((_, i) => (
@@ -273,8 +243,14 @@ export function OrdersTable({
             ))}
             <PaginationItem>
               <PaginationNext
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                onClick={() =>
+                  setCurrentPage(Math.min(totalPages, currentPage + 1))
+                }
+                className={
+                  currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
               />
             </PaginationItem>
           </PaginationContent>

@@ -19,20 +19,20 @@ interface ProductImagePreviewProps {
 }
 
 export function ProductImagePreview({ product, open, onOpenChange }: ProductImagePreviewProps) {
-  if (!product) return null;
-
   const [selectedColor, setSelectedColor] = useState<'red' | 'blue'>('red');
   const [quantity, setQuantity] = useState(1);
 
+  
   const getStockStatus = (product: Product) => {
     if (product.stock === 0) return { label: "OUT OF STOCK", variant: "destructive" as const };
     if (product.stock <= product.reorderThreshold) return { label: "LOW STOCK", variant: "warning" as const };
     return { label: `IN STOCK`, variant: "success" as const };
   };
-
+  
   const stockStatus = getStockStatus(product);
   const isOutOfStock = product.stock === 0;
-
+  
+  if (!product) return null;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl">
