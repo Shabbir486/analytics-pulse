@@ -31,31 +31,56 @@ export function ProductImageCarousel({ product }: ProductImageCarouselProps) {
     setCurrentSlide(api.selectedScrollSnap() + 1);
   };
 
+  const handleThumbnailClick = (index: number) => {
+    if (!api) return;
+    api.scrollTo(index);
+  };
+
   return (
-    <div className="relative">
-      <Carousel 
-        className="w-full" 
-        setApi={setApi}
-        onSelect={onSelect}
-      >
-        <CarouselContent>
-          {productImages.map((image, index) => (
-            <CarouselItem key={index}>
-              <div className="aspect-square w-full overflow-hidden rounded-lg">
-                <img
-                  src={image}
-                  alt={`${product.name} - View ${index + 1}`}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
-      <div className="absolute bottom-4 right-4 bg-black/60 text-white px-2 py-1 rounded-md text-sm">
-        {currentSlide} / {productImages.length}
+    <div className="space-y-4">
+      <div className="relative">
+        <Carousel 
+          className="w-full" 
+          setApi={setApi}
+          onSelect={onSelect}
+        >
+          <CarouselContent>
+            {productImages.map((image, index) => (
+              <CarouselItem key={index}>
+                <div className="aspect-square w-full overflow-hidden rounded-lg">
+                  <img
+                    src={image}
+                    alt={`${product.name} - View ${index + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+        <div className="absolute bottom-4 right-4 bg-black/60 text-white px-2 py-1 rounded-md text-sm">
+          {currentSlide} / {productImages.length}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-4 gap-4">
+        {productImages.map((image, index) => (
+          <button
+            key={index}
+            onClick={() => handleThumbnailClick(index)}
+            className={`aspect-square overflow-hidden rounded-lg border-2 ${
+              currentSlide === index + 1 ? 'border-primary' : 'border-transparent'
+            }`}
+          >
+            <img
+              src={image}
+              alt={`${product.name} - Thumbnail ${index + 1}`}
+              className="h-full w-full object-cover"
+            />
+          </button>
+        ))}
       </div>
     </div>
   );

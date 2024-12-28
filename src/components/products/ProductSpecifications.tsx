@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Product } from "@/types/product";
+import { ProductReviews } from "./ProductReviews";
 
 interface ProductSpecificationsProps {
   product: Product;
@@ -42,7 +43,7 @@ export function ProductSpecifications({ product }: ProductSpecificationsProps) {
       <Tabs defaultValue="description" className="w-full">
         <TabsList>
           <TabsTrigger value="description">Description</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews (0)</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews (10)</TabsTrigger>
         </TabsList>
         <TabsContent value="description" className="space-y-8">
           <div>
@@ -92,7 +93,7 @@ export function ProductSpecifications({ product }: ProductSpecificationsProps) {
           </div>
         </TabsContent>
         <TabsContent value="reviews">
-          <p className="text-muted-foreground">No reviews yet.</p>
+          <ProductReviews />
         </TabsContent>
       </Tabs>
     </div>
