@@ -27,6 +27,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { Order, OrderStatus } from "@/types/order";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
+import { Switch } from "../ui/switch";
 
 interface OrdersTableProps {
   statusFilter: OrderStatus | "all";
@@ -95,16 +96,10 @@ export function OrdersTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsDense(!isDense)}
-        >
-          {isDense ? "Dense view" : "Regular view"}
-        </Button>
+      <div className="inline-flex items-center gap-2">
+        <p>Dense</p>
+        <Switch checked={isDense} onClick={() => setIsDense(!isDense)}></Switch>
       </div>
-      
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
@@ -166,29 +161,29 @@ export function OrdersTable({
                 {expandedRows.has(order.id) && (
                   <TableRow>
                     <TableCell colSpan={12} className="bg-muted/50 p-2">
-                        <div className="space-y-1">
-                          {order.items.map((item) => (
-                            <div
-                              key={item.id}
-                              className="bg-card rounded-sm shadow-md p-2 flex items-center justify-between"
-                            >
-                              <img
-                                src={item.image}
-                                alt="Urban Explorer Sneakers"
-                                className="rounded-lg mr-4 w-16"
-                              />
-                              <div className=" flex flex-col min-w-10 justify-start w-full">
-                                <span className="font-medium">{item.name}</span>
-                                <span className="text-sm text-muted-foreground">
-                                  (SKU: {item.sku})
-                                </span>
-                              </div>
-                              <p className="w-24"> x{item.quantity}</p>
-                              <div className=" text-sm text-right w-24">
-                                ${item.price.toFixed(2)}
-                              </div>
+                      <div className="space-y-1">
+                        {order.items.map((item) => (
+                          <div
+                            key={item.id}
+                            className="bg-card rounded-sm shadow-md p-2 flex items-center justify-between"
+                          >
+                            <img
+                              src={item.image}
+                              alt="Urban Explorer Sneakers"
+                              className="rounded-lg mr-4 w-16 object-cover"
+                            />
+                            <div className=" flex flex-col min-w-10 justify-start w-full">
+                              <span className="font-medium">{item.name}</span>
+                              <span className="text-sm text-muted-foreground">
+                                (SKU: {item.sku})
+                              </span>
                             </div>
-                          ))}
+                            <p className="w-24"> x{item.quantity}</p>
+                            <div className=" text-sm text-right w-24">
+                              ${item.price.toFixed(2)}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </TableCell>
                   </TableRow>

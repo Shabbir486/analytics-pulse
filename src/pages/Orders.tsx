@@ -4,6 +4,7 @@ import { OrdersHeader } from "@/components/orders/OrdersHeader";
 import { Order, OrderStatus } from "@/types/order";
 
 // Generate 20 mock orders
+const mockNames = ["Product A", "Product B", "Product C", "Product D", "Product E", "Product F", "Product G", "Product H", "Product I", "Product J", "Product K", "Product L", "Product M", "Product N", "Product O", "Product P", "Product Q", "Product R", "Product S", "Product T", "Product U", "Product V", "Product W", "Product X", "Product Y", "Product Z"];
 const generateMockOrders = (): Order[] => {
   const statuses: OrderStatus[] = ['pending', 'completed', 'cancelled', 'refunded'];
   const orders: Order[] = [];
@@ -21,7 +22,7 @@ const generateMockOrders = (): Order[] => {
         {
           id: `item-${i}-1`,
           image: "/lovable-uploads/mock-image.png",
-          name: "Product A",
+          name: `${mockNames[i - 1]}`,
           quantity: Math.floor(Math.random() * 3) + 1,
           price: 79.99,
           sku: "SKU001"
@@ -29,7 +30,7 @@ const generateMockOrders = (): Order[] => {
         {
           id: `item-${i}-2`,
           image: "/lovable-uploads/mock-image.png",
-          name: "Product B",
+          name: `${mockNames[i - 1]}`,
           quantity: Math.floor(Math.random() * 2) + 1,
           price: 129.99,
           sku: "SKU002"
