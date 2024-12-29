@@ -167,11 +167,13 @@ export function OrdersTable({
                             key={item.id}
                             className="bg-card rounded-sm shadow-md p-2 flex items-center justify-between"
                           >
+                            <div className="w-20 mx-2">
                             <img
                               src={item.image}
                               alt="Urban Explorer Sneakers"
-                              className="rounded-lg mr-4 w-16 object-cover"
+                              className="rounded-lg mr-4 w-16 h-16 object-cover"
                             />
+                            </div>
                             <div className=" flex flex-col min-w-10 justify-start w-full">
                               <span className="font-medium">{item.name}</span>
                               <span className="text-sm text-muted-foreground">
@@ -180,7 +182,7 @@ export function OrdersTable({
                             </div>
                             <p className="w-24"> x{item.quantity}</p>
                             <div className=" text-sm text-right w-24">
-                              ${item.price.toFixed(2)}
+                              {item.price.toFixed(2)}
                             </div>
                           </div>
                         ))}

@@ -154,7 +154,7 @@ export function ProductTable({
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full">
           <span className="text-sm text-muted-foreground">Rows per page</span>
           <Select
             value={String(rowsPerPage)}
@@ -170,21 +170,18 @@ export function ProductTable({
               <SelectItem value="50">50</SelectItem>
             </SelectContent>
           </Select>
-          <span className="text-sm text-muted-foreground">
-            Showing {(currentPage - 1) * rowsPerPage + 1}-{Math.min(currentPage * rowsPerPage, totalRecords)} of {totalRecords}
-          </span>
         </div>
 
-        <Pagination>
+        <Pagination className="w-full">
           <PaginationContent>
-            <PaginationItem>
+            <PaginationItem className="w-[3.6rem]">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
               >
-                <PaginationPrevious className="h-4 w-4" />
+                <PaginationPrevious />
               </Button>
             </PaginationItem>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
@@ -210,6 +207,10 @@ export function ProductTable({
             </PaginationItem>
           </PaginationContent>
         </Pagination>
+
+        <span className="text-sm text-muted-foreground w-full text-right">
+            Showing {(currentPage - 1) * rowsPerPage + 1}-{Math.min(currentPage * rowsPerPage, totalRecords)} of {totalRecords}
+          </span>
       </div>
 
       <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>

@@ -4,33 +4,14 @@ import { ProductPrice } from "@/components/products/ProductPrice";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, Share, Scale, ChevronDown, Plus, Minus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Product } from "@/types/product";
 import { ProductSpecifications } from "@/components/products/ProductSpecifications";
 
+import { faker } from '@faker-js/faker';
+
 // Mock function to fetch product - replace with actual data fetching
-const getProduct = (id: string): Product | null => {
-  // For demo, return mock data
-  return {
-    id: parseInt(id),
-    name: "Urban Explorer Sneakers",
-    sku: "UES-001",
-    description: "Modern urban sneakers with comfort technology",
-    price: 83.74,
-    discountPrice: 79.99,
-    currency: "USD",
-    tax: 10,
-    stock: 0,
-    reorderThreshold: 10,
-    category: "Accessories",
-    status: "Draft",
-    metaTitle: "Urban Explorer Sneakers",
-    metaDescription: "Comfortable urban sneakers for daily wear",
-    customUrl: "urban-explorer-sneakers",
-    image: "/lovable-uploads/0abfa0b3-7f64-4661-a4d4-52cf395f1d90.png",
-    createdAt: "2024-11-29T01:05:00",
-  };
-};
+
 
 export function ProductView() {
   const { id } = useParams();
@@ -38,8 +19,42 @@ export function ProductView() {
   const [selectedColor, setSelectedColor] = useState<'red' | 'blue'>('red');
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [product, setMockProduct] = useState<Product | null>(null);
+  // const product = getProduct(id || "");
 
-  const product = getProduct(id || "");
+  useEffect(() => {
+    const getProduct = (id: string): Product | null => {
+      // For demo, return mock data using faker
+      return {
+        id: parseInt(id),
+        name: faker.commerce.productName(),
+        sku: faker.string.alphanumeric(8).toUpperCase(),
+        description: faker.commerce.productDescription(),
+        price: parseFloat(faker.commerce.price()),
+        discountPrice: parseFloat(faker.commerce.price()),
+        currency: "USD",
+        tax: parseFloat(faker.commerce.price()),
+        stock: faker.number.int({ min: 0, max: 100 }),
+        reorderThreshold: faker.number.int({ min: 1, max: 10 }),
+        category: faker.commerce.department(),
+        status: "Draft",
+        metaTitle: faker.commerce.productName(),
+        metaDescription: faker.commerce.productDescription(),
+        customUrl: faker.internet.url(),
+        image: faker.image.url(),
+        createdAt: faker.date.past().toISOString(),
+        tags: faker.helpers.arrayElements(["sneakers", "urban", "comfort", "fashion", "casual"], 3),
+        images: [
+          faker.image.url(),
+          faker.image.url(),
+          faker.image.url()
+        ],
+        rating: faker.number.float({ min: 1, max: 5, fractionDigits: 1 }),
+        reviews: [],
+      };
+    };
+    setMockProduct(getProduct(id || ""));
+  },[]);
 
   if (!product) {
     return <div>Product not found</div>;
@@ -52,12 +67,7 @@ export function ProductView() {
   };
 
   // Mock multiple images for demonstration
-  const productImages = [
-    product.image,
-    "/lovable-uploads/0abfa0b3-7f64-4661-a4d4-52cf395f1d90.png",
-    "/lovable-uploads/1d7ff204-1f12-485d-807f-06cde4656bfe.png",
-    "/lovable-uploads/aefb88e5-9912-4de1-926c-1f4643ecffe5.png",
-  ];
+  const productImages = [...product.images  ];
 
   const stockStatus = getStockStatus(product);
   const isOutOfStock = product.stock === 0;
@@ -81,12 +91,12 @@ export function ProductView() {
               className="h-full w-full object-cover"
             />
           </div>
-          <div className="grid grid-cols-4 gap-4">
-            {productImages.map((image, index) => (
+          <div className="inline-flex gap-2">
+            {product.images.map((image, index) => (
               <button
                 key={index}
                 onClick={() => setSelectedImage(index)}
-                className={`aspect-square overflow-hidden rounded-lg border-2 ${
+                className={`aspect-square overflow-hidden rounded-lg border-2 h-16 w-16 ${
                   selectedImage === index ? 'border-primary' : 'border-transparent'
                 }`}
               >
