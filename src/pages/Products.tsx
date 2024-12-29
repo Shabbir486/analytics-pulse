@@ -3,9 +3,9 @@ import { ProductColumnsSelector, ColumnVisibility } from "@/components/products/
 import { ProductFilters, ProductFilter } from "@/components/products/ProductFilters";
 import { useState } from "react";
 import type { Product } from "@/types/product";
-import { faker } from '@faker-js/faker';
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 export function Products() {
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
@@ -18,35 +18,51 @@ export function Products() {
   });
   const [activeFilter, setActiveFilter] = useState<ProductFilter | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [searchQuery, setSearchQuery] = useState("");
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const generateRandomProducts = (count: number): Product[] => {
-    return Array.from({ length: count }, (_, id) => ({
-      id: id + 1,
-      name: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
-      price: parseFloat(faker.commerce.price()),
-      stock: faker.number.int({ min: 0, max: 100 }),
-      sku: faker.string.uuid(),
-      discountPrice: parseFloat(faker.commerce.price()),
-      currency: faker.finance.currencyCode(),
-      tax: parseFloat(faker.commerce.price()),
-      category: faker.commerce.department(),
-      tags: faker.helpers.arrayElements(['tag1', 'tag2', 'tag3', 'tag4'], 2),
-      images: [faker.image.url()],
-      rating: parseFloat(faker.number.float({ min: 1, max: 5 }).toFixed(1)),
-      reviews: [],
-      reorderThreshold: faker.number.int({ min: 1, max: 20 }),
-      status: faker.helpers.arrayElement(['Published', 'Draft']),
-      metaTitle: faker.lorem.words(3),
-      metaDescription: faker.lorem.sentence(),
-      customUrl: faker.internet.url(),
-      image: faker.image.url(),
-      createdAt: faker.date.past().toISOString()
-    }));
-  };
+  const mockProducts: Product[] = Array.from({ length: 30 }, (_, i) => ({
+    id: i + 1,
+    name: `Product ${i + 1}`,
+    sku: `SKU-${i + 1}`,
+    description: `Description for product ${i + 1}`,
+    price: Math.floor(Math.random() * 1000) + 1,
+    discountPrice: Math.floor(Math.random() * 500),
+    currency: "USD",
+    tax: Math.floor(Math.random() * 100),
+    stock: Math.floor(Math.random() * 100),
+    reorderThreshold: 10,
+    category: ["Electronics", "Clothing", "Books", "Food"][Math.floor(Math.random() * 4)],
+    status: Math.random() > 0.5 ? "Published" : "Draft",
+    metaTitle: `Product ${i + 1} Meta Title`,
+    metaDescription: `Meta description for product ${i + 1}`,
+    customUrl: `product-${i + 1}`,
+    image: "/placeholder.svg",
+    createdAt: new Date().toISOString(),
+    tags: ["tag1", "tag2"],
+    images: ["/placeholder.svg"],
+    rating: 4.5,
+    reviews: []
+  }));
 
-  const [products] = useState<Product[]>(generateRandomProducts(30));
+  const filteredProducts = mockProducts.filter(product => {
+    const matchesSearch = 
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.sku.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesFilter = !activeFilter || (
+      activeFilter.column === "price" 
+        ? Number(product[activeFilter.column]) === Number(activeFilter.value)
+        : String(product[activeFilter.column as keyof Product]).toLowerCase().includes(activeFilter.value.toLowerCase())
+    );
+
+    return matchesSearch && matchesFilter;
+  });
+
+  const totalPages = Math.ceil(filteredProducts.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
 
   const handleSelectProduct = (productId: number) => {
     setSelectedProducts(prev => 
@@ -58,33 +74,9 @@ export function Products() {
 
   const handleSelectAll = () => {
     setSelectedProducts(prev => 
-      prev.length === products.length ? [] : products.map(p => p.id)
+      prev.length === paginatedProducts.length ? [] : paginatedProducts.map(p => p.id)
     );
   };
-
-  const handleColumnChange = (column: keyof ColumnVisibility) => {
-    setColumnVisibility(prev => ({
-      ...prev,
-      [column]: !prev[column],
-    }));
-  };
-
-  const handleResetColumns = () => {
-    setColumnVisibility({
-      product: true,
-      createAt: true,
-      stock: true,
-      price: true,
-      status: true,
-    });
-  };
-
-  // Pagination logic
-  const totalPages = Math.ceil(products.length / itemsPerPage);
-  const paginatedProducts = products.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   return (
     <div className="space-y-4">
@@ -96,8 +88,23 @@ export function Products() {
           />
           <ProductColumnsSelector
             columns={columnVisibility}
-            onColumnChange={handleColumnChange}
-            onReset={handleResetColumns}
+            onColumnChange={(column) => setColumnVisibility(prev => ({
+              ...prev,
+              [column]: !prev[column],
+            }))}
+            onReset={() => setColumnVisibility({
+              product: true,
+              createAt: true,
+              stock: true,
+              price: true,
+              status: true,
+            })}
+          />
+          <Input
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-sm"
           />
         </div>
         <Button className="gap-2">
@@ -115,6 +122,9 @@ export function Products() {
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={setCurrentPage}
+        totalRecords={filteredProducts.length}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={setRowsPerPage}
       />
     </div>
   );

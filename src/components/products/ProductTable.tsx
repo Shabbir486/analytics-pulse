@@ -12,6 +12,7 @@ import { ProductForm } from "./ProductForm";
 import { useState } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 interface ProductTableProps {
@@ -23,6 +24,9 @@ interface ProductTableProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  totalRecords: number;
+  rowsPerPage: number;
+  onRowsPerPageChange: (value: number) => void;
 }
 
 export function ProductTable({ 
@@ -39,17 +43,14 @@ export function ProductTable({
   },
   currentPage,
   totalPages,
-  onPageChange
+  onPageChange,
+  totalRecords,
+  rowsPerPage,
+  onRowsPerPageChange
 }: ProductTableProps) {
   const navigate = useNavigate();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
-
-  const getStockStatus = (product: Product) => {
-    if (product.stock === 0) return { label: "Out of stock", variant: "destructive" as const };
-    if (product.stock <= product.reorderThreshold) return { label: "Low stock", variant: "warning" as const };
-    return { label: `${product.stock} in stock`, variant: "success" as const };
-  };
 
   const handleView = (product: Product) => {
     navigate(`/products/${product.id}`);
@@ -65,7 +66,6 @@ export function ProductTable({
 
   const confirmDelete = () => {
     if (deleteProduct) {
-      // Here you would typically make an API call to delete the product
       toast.success(`Product "${deleteProduct.name}" deleted successfully`);
       setDeleteProduct(null);
     }
@@ -73,79 +73,51 @@ export function ProductTable({
 
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/50">
-            <TableHead className="w-12">
-              <Checkbox
-                checked={products.length > 0 && selectedProducts.length === products.length}
-                onCheckedChange={onSelectAll}
-                aria-label="Select all products"
-              />
-            </TableHead>
-            {columnVisibility.product && <TableHead>Product</TableHead>}
-            {columnVisibility.createAt && <TableHead>Create at</TableHead>}
-            {columnVisibility.stock && <TableHead>Stock</TableHead>}
-            {columnVisibility.price && <TableHead>Price</TableHead>}
-            {columnVisibility.status && <TableHead>Status</TableHead>}
-            <TableHead className="w-24">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {products.map((product) => {
-            const stockStatus = getStockStatus(product);
-            return (
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12">
+                <Checkbox 
+                  checked={products.length > 0 && selectedProducts.length === products.length}
+                  onCheckedChange={onSelectAll}
+                />
+              </TableHead>
+              {columnVisibility.product && <TableHead>Product</TableHead>}
+              {columnVisibility.createAt && <TableHead>Create at</TableHead>}
+              {columnVisibility.stock && <TableHead>Stock</TableHead>}
+              {columnVisibility.price && <TableHead>Price</TableHead>}
+              {columnVisibility.status && <TableHead>Status</TableHead>}
+              <TableHead className="w-24">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {products.map((product) => (
               <TableRow key={product.id}>
                 <TableCell>
-                  <Checkbox
+                  <Checkbox 
                     checked={selectedProducts.includes(product.id)}
                     onCheckedChange={() => onSelectProduct(product.id)}
-                    aria-label={`Select ${product.name}`}
                   />
                 </TableCell>
                 {columnVisibility.product && (
                   <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div>
-                        <div className="font-medium">{product.name}</div>
-                        <div className="text-sm text-muted-foreground">{product.category}</div>
-                      </div>
-                    </div>
+                    <div className="font-medium">{product.name}</div>
+                    <div className="text-sm text-muted-foreground">{product.sku}</div>
                   </TableCell>
                 )}
                 {columnVisibility.createAt && (
-                  <TableCell>
-                    <div className="text-sm">
-                      {format(new Date(product.createdAt), "dd MMM yyyy")}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {format(new Date(product.createdAt), "hh:mm a")}
-                    </div>
-                  </TableCell>
+                  <TableCell>{format(new Date(product.createdAt), "MMM dd, yyyy")}</TableCell>
                 )}
                 {columnVisibility.stock && (
-                  <TableCell>
-                    <Badge 
-                      variant={stockStatus.variant}
-                      className="font-normal"
-                    >
-                      {stockStatus.label}
-                    </Badge>
-                  </TableCell>
+                  <TableCell>{product.stock}</TableCell>
                 )}
                 {columnVisibility.price && (
-                  <TableCell>
-                    <div className="font-medium">
-                      ${product.price.toFixed(2)}
-                    </div>
-                  </TableCell>
+                  <TableCell>${product.price.toFixed(2)}</TableCell>
                 )}
                 {columnVisibility.status && (
                   <TableCell>
-                    <Badge 
-                      variant={product.status === "Published" ? "default" : "secondary"}
-                      className="font-normal"
-                    >
+                    <Badge variant={product.status === "Published" ? "default" : "secondary"}>
                       {product.status}
                     </Badge>
                   </TableCell>
@@ -158,7 +130,6 @@ export function ProductTable({
                       onClick={() => handleView(product)}
                     >
                       <Eye className="h-4 w-4" />
-                      <span className="sr-only">View {product.name}</span>
                     </Button>
                     <Button
                       variant="ghost"
@@ -166,7 +137,6 @@ export function ProductTable({
                       onClick={() => handleEdit(product)}
                     >
                       <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Edit {product.name}</span>
                     </Button>
                     <Button
                       variant="ghost"
@@ -174,40 +144,69 @@ export function ProductTable({
                       onClick={() => handleDelete(product)}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
-                      <span className="sr-only">Delete {product.name}</span>
                     </Button>
                   </div>
                 </TableCell>
               </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
-      <div className="mt-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Rows per page</span>
+          <Select
+            value={String(rowsPerPage)}
+            onValueChange={(value) => onRowsPerPageChange(Number(value))}
+          >
+            <SelectTrigger className="w-[70px]">
+              <SelectValue>{rowsPerPage}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
+          <span className="text-sm text-muted-foreground">
+            Showing {(currentPage - 1) * rowsPerPage + 1}-{Math.min(currentPage * rowsPerPage, totalRecords)} of {totalRecords}
+          </span>
+        </div>
+
         <Pagination>
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious 
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-              />
+              >
+                <PaginationPrevious className="h-4 w-4" />
+              </Button>
             </PaginationItem>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <PaginationItem key={page}>
-                <PaginationLink
+                <Button
+                  variant={currentPage === page ? "default" : "ghost"}
+                  size="icon"
                   onClick={() => onPageChange(page)}
-                  isActive={currentPage === page}
                 >
                   {page}
-                </PaginationLink>
+                </Button>
               </PaginationItem>
             ))}
             <PaginationItem>
-              <PaginationNext
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
-              />
+              >
+                <PaginationNext className="h-4 w-4" />
+              </Button>
             </PaginationItem>
           </PaginationContent>
         </Pagination>

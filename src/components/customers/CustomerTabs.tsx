@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { mockCustomers } from "./mockData";
 
 interface CustomerTabsProps {
   selectedTab: "all" | "active" | "pending" | "banned" | "rejected";
@@ -7,12 +8,18 @@ interface CustomerTabsProps {
 }
 
 export function CustomerTabs({ selectedTab, onTabChange }: CustomerTabsProps) {
+  const getStatusCount = (status: string) => {
+    return mockCustomers.filter(customer => 
+      status === "all" ? true : customer.status.toLowerCase() === status.toLowerCase()
+    ).length;
+  };
+
   const tabs = [
-    { id: "all" as const, label: "All", count: 20 },
-    { id: "active" as const, label: "Active", count: 2 },
-    { id: "pending" as const, label: "Pending", count: 10 },
-    { id: "banned" as const, label: "Banned", count: 6 },
-    { id: "rejected" as const, label: "Rejected", count: 2 },
+    { id: "all" as const, label: "All", count: getStatusCount("all") },
+    { id: "active" as const, label: "Active", count: getStatusCount("active") },
+    { id: "pending" as const, label: "Pending", count: getStatusCount("pending") },
+    { id: "banned" as const, label: "Banned", count: getStatusCount("banned") },
+    { id: "rejected" as const, label: "Rejected", count: getStatusCount("rejected") },
   ];
 
   return (

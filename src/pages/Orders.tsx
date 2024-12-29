@@ -2,7 +2,6 @@ import { OrdersHeader } from "@/components/orders/OrdersHeader";
 import { OrdersTable } from "@/components/orders/OrdersTable";
 import { useState } from "react";
 import { Order, OrderStatus } from "@/types/order";
-import { faker } from "@faker-js/faker";
 
 export function Orders() {
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | "all">("all");
@@ -11,7 +10,6 @@ export function Orders() {
     from: undefined, 
     to: undefined 
   });
-  const [sortConfig, setSortConfig] = useState({ key: "date", direction: "desc" });
 
   const mockOrders: Order[] = [
     {
@@ -121,6 +119,18 @@ export function Orders() {
     },
   ];
 
+  const filteredOrders = mockOrders.filter(order => {
+    const matchesStatus = selectedStatus === "all" || order.status === selectedStatus;
+    const matchesSearch = 
+      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.customer.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesDate = 
+      !dateRange.from || !dateRange.to || 
+      (new Date(order.date) >= dateRange.from && new Date(order.date) <= dateRange.to);
+
+    return matchesStatus && matchesSearch && matchesDate;
+  });
+
   return (
     <div className="space-y-4">
       <OrdersHeader
@@ -136,7 +146,7 @@ export function Orders() {
         statusFilter={selectedStatus}
         searchQuery={searchQuery}
         dateRange={dateRange}
-        mockOrders={mockOrders}
+        mockOrders={filteredOrders}
       />
     </div>
   );
