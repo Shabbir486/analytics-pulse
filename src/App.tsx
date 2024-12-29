@@ -1,34 +1,20 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AdminLayout } from "./components/layout/AdminLayout";
-import { Products } from "./pages/Products";
-import { ProductView } from "./pages/ProductView";
-import { Orders } from "./pages/Orders";
-import Index from "./pages/Index";
-
-const queryClient = new QueryClient();
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import AdminLayout from "@/components/layouts/AdminLayout";
+import Dashboard from "@/pages/Dashboard";
+import Products from "@/pages/Products";
+import Orders from "@/pages/Orders";
+import Customers from "@/pages/Customers";
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<AdminLayout />}>
-              <Route index element={<Index />} />
-              <Route path="products" element={<Products />} />
-              <Route path="products/:id" element={<ProductView />} />
-              <Route path="orders" element={<Orders />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<AdminLayout><Dashboard /></AdminLayout>} />
+        <Route path="/products" element={<AdminLayout><Products /></AdminLayout>} />
+        <Route path="/orders" element={<AdminLayout><Orders /></AdminLayout>} />
+        <Route path="/customers" element={<AdminLayout><Customers /></AdminLayout>} />
+      </Routes>
+    </Router>
   );
 }
 
