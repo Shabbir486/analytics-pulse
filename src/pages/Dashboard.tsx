@@ -4,36 +4,33 @@ import { RevenueChart } from "@/components/dashboard/RevenueChart";
 export function Dashboard() {
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-      
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard 
+        <StatCard
           title="Total Revenue"
-          value="$45,231.89"
-          description="+20.1% from last month"
-          trend="up"
+          value={{ value: 45850, isPositive: true }}
+          description="You made an extra $550 this week"
+          icon="dollar-sign"
         />
-        <StatCard 
+        <StatCard
           title="Subscriptions"
-          value="2,350"
+          value={{ value: 2350, isPositive: true }}
           description="+180.1% from last month"
-          trend="up"
+          icon="users"
         />
-        <StatCard 
+        <StatCard
           title="Sales"
-          value="12,234"
-          description="-19.5% from last month"
-          trend="down"
+          value={{ value: 12234, isPositive: false }}
+          description="-19% from last month"
+          icon="shopping-cart"
         />
-        <StatCard 
+        <StatCard
           title="Active Users"
-          value="573"
+          value={{ value: 573, isPositive: true }}
           description="+201 since last hour"
-          trend="up"
+          icon="user-plus"
         />
       </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
         <div className="col-span-4">
           <RevenueChart />
         </div>
