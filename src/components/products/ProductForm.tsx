@@ -47,7 +47,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
     }
   }, [initialData, reset]);
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: Record<string, string | number | boolean | string[]>) => {
     console.log("Form data:", {
       ...data,
       image: imageUrl
@@ -68,8 +68,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = (e: any) => {
-      const file = e.target.files[0];
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files[0];
       if (file) {
         // Mock image upload
         setImageUrl("/lovable-uploads/mock-image.png");

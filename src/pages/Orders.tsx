@@ -127,8 +127,7 @@ export function Orders() {
         onSearchChange={setSearchQuery}
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
-        sortConfig={sortConfig}
-        onSortChange={setSortConfig}
+        mockOrders={mockOrders}
       />
       <OrdersTable
         statusFilter={selectedStatus}

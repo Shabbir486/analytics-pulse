@@ -16,4 +16,8 @@ export interface Product {
   customUrl: string;
   image: string;
   createdAt: string;
+  tags: string[];
+  images: string[];
+  rating: number;
+  reviews: [];
 }
