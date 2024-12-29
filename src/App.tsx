@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import AdminLayout from "@/components/layouts/AdminLayout";
-import Dashboard from "@/pages/Dashboard";
-import Products from "@/pages/Products";
-import Orders from "@/pages/Orders";
-import Customers from "@/pages/Customers";
+import { AdminLayout } from "@/components/layout/AdminLayout";
+import { Dashboard } from "@/pages/Dashboard";
+import { Products } from "@/pages/Products";
+import { Orders } from "@/pages/Orders";
+import { Customers } from "@/pages/Customers";
 
 function App() {
   return (
