@@ -12,6 +12,7 @@ import { ProductForm } from "./ProductForm";
 import { useState } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 interface ProductTableProps {
   products: Product[];
@@ -19,6 +20,9 @@ interface ProductTableProps {
   onSelectProduct: (productId: number) => void;
   onSelectAll: () => void;
   columnVisibility?: ColumnVisibility;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
 export function ProductTable({ 
@@ -32,7 +36,10 @@ export function ProductTable({
     stock: true,
     price: true,
     status: true,
-  }
+  },
+  currentPage,
+  totalPages,
+  onPageChange
 }: ProductTableProps) {
   const navigate = useNavigate();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -176,6 +183,35 @@ export function ProductTable({
           })}
         </TableBody>
       </Table>
+
+      <div className="mt-4">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  onClick={() => onPageChange(page)}
+                  isActive={currentPage === page}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
 
       <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">

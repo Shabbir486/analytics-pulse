@@ -2,23 +2,26 @@ import { OrdersHeader } from "@/components/orders/OrdersHeader";
 import { OrdersTable } from "@/components/orders/OrdersTable";
 import { useState } from "react";
 import { Order, OrderStatus } from "@/types/order";
+import { faker } from "@faker-js/faker";
 
 export function Orders() {
-  const [selectedStatus, setSelectedStatus] = useState<"all" | OrderStatus>("all");
+  const [selectedStatus, setSelectedStatus] = useState<OrderStatus | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [dateRange, setDateRange] = useState({ from: null, to: null });
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({ 
+    from: undefined, 
+    to: undefined 
+  });
   const [sortConfig, setSortConfig] = useState({ key: "date", direction: "desc" });
-  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
 
   const mockOrders: Order[] = [
     {
       id: "1",
       customer: {
-        name: "Angelique Morse",
-        email: "angelique@example.com",
+        name: "John Doe",
+        email: "john@example.com",
         avatar: "/placeholder.svg"
       },
-      date: "2023-01-01",
+      date: "2024-01-01",
       items: [
         {
           id: "1",
