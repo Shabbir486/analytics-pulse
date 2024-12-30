@@ -1,14 +1,24 @@
 import { ProductTable } from "@/components/products/ProductTable";
-import { ProductColumnsSelector, ColumnVisibility } from "@/components/products/ProductColumnsSelector";
-import { ProductFilters, ProductFilter } from "@/components/products/ProductFilters";
+import {
+  ProductColumnsSelector,
+  ColumnVisibility,
+} from "@/components/products/ProductColumnsSelector";
+import {
+  ProductFilters,
+  ProductFilter,
+} from "@/components/products/ProductFilters";
 import { useState } from "react";
 import type { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Download, Plus, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ProductForm } from "@/components/products/ProductForm";
+import { toast } from "sonner";
 export function Products() {
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
     product: true,
     createAt: true,
@@ -34,7 +44,9 @@ export function Products() {
       tax: Math.floor(Math.random() * 100),
       stock: Math.floor(Math.random() * 100),
       reorderThreshold: 10,
-      category: ["Electronics", "Clothing", "Books", "Food"][Math.floor(Math.random() * 4)],
+      category: ["Electronics", "Clothing", "Books", "Food"][
+        Math.floor(Math.random() * 4)
+      ],
       status: Math.random() > 0.5 ? "Published" : "Draft",
       metaTitle: `Product ${i + 1} Meta Title`,
       metaDescription: `Meta description for product ${i + 1}`,
@@ -44,21 +56,49 @@ export function Products() {
       tags: ["tag1", "tag2"],
       images: ["/placeholder.svg"],
       rating: 4.5,
-      reviews: []
+      reviews: [],
     }));
     setMockProducts(mockProducts);
-  },[])
+  }, []);
 
-  const filteredProducts = mockProducts.filter(product => {
-    const matchesSearch = 
+  const handleBulkExport = () => {
+    const selectedData = mockProducts.filter((product) =>
+      selectedProducts.includes(product.id)
+    );
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      Object.keys(selectedData[0]).join(",") +
+      "\n" +
+      selectedData
+        .map((product) => Object.values(product).join(","))
+        .join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "products.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Products exported successfully");
+  };
+
+  const handleBulkDelete = () => {
+    toast.success(`${selectedProducts.length} products deleted`);
+    setSelectedProducts([]);
+  };
+
+  const filteredProducts = mockProducts.filter((product) => {
+    const matchesSearch =
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.sku.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesFilter = !activeFilter || (
-      activeFilter.column === "price" 
+
+    const matchesFilter =
+      !activeFilter ||
+      (activeFilter.column === "price"
         ? Number(product[activeFilter.column]) === Number(activeFilter.value)
-        : String(product[activeFilter.column as keyof Product]).toLowerCase().includes(activeFilter.value.toLowerCase())
-    );
+        : String(product[activeFilter.column as keyof Product])
+            .toLowerCase()
+            .includes(activeFilter.value.toLowerCase()));
 
     return matchesSearch && matchesFilter;
   });
@@ -69,21 +109,33 @@ export function Products() {
   const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
 
   const handleSelectProduct = (productId: number) => {
-    setSelectedProducts(prev => 
-      prev.includes(productId) 
-        ? prev.filter(id => id !== productId)
+    setSelectedProducts((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
         : [...prev, productId]
     );
   };
 
   const handleSelectAll = () => {
-    setSelectedProducts(prev => 
-      prev.length === paginatedProducts.length ? [] : paginatedProducts.map(p => p.id)
+    setSelectedProducts((prev) =>
+      prev.length === paginatedProducts.length
+        ? []
+        : paginatedProducts.map((p) => p.id)
     );
   };
 
   return (
     <div className="space-y-4">
+      <div className="space-y-1">
+          <h1 className="text-2xl font-semibold">Products</h1>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Dashboard</span>
+            <span>•</span>
+            <span>Product</span>
+            <span>•</span>
+            <span>List</span>
+          </div>
+        </div>
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <ProductFilters
@@ -92,17 +144,21 @@ export function Products() {
           />
           <ProductColumnsSelector
             columns={columnVisibility}
-            onColumnChange={(column) => setColumnVisibility(prev => ({
-              ...prev,
-              [column]: !prev[column],
-            }))}
-            onReset={() => setColumnVisibility({
-              product: true,
-              createAt: true,
-              stock: true,
-              price: true,
-              status: true,
-            })}
+            onColumnChange={(column) =>
+              setColumnVisibility((prev) => ({
+                ...prev,
+                [column]: !prev[column],
+              }))
+            }
+            onReset={() =>
+              setColumnVisibility({
+                product: true,
+                createAt: true,
+                stock: true,
+                price: true,
+                status: true,
+              })
+            }
           />
           <Input
             placeholder="Search products..."
@@ -111,11 +167,44 @@ export function Products() {
             className="max-w-sm"
           />
         </div>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Product
-        </Button>
+        <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              New product
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Add New Product</DialogTitle>
+            </DialogHeader>
+            <ProductForm />
+          </DialogContent>
+        </Dialog>
       </div>
+
+      {selectedProducts.length > 0 && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleBulkExport}
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Export Selected
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleBulkDelete}
+              className="gap-2"
+            >
+              <Trash className="h-4 w-4" />
+              Delete Selected
+            </Button>
+          </div>
+        )}
 
       <ProductTable
         products={paginatedProducts}

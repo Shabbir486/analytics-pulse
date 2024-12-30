@@ -15,35 +15,29 @@ interface ProductImageCarouselProps {
 
 export function ProductImageCarousel({ product }: ProductImageCarouselProps) {
   const [currentSlide, setCurrentSlide] = useState(1);
-  const [api, setApi] = useState<CarouselApi>();
-  
-  // Mock multiple images for demonstration
-  const productImages = [
-    product.image,
-    "/lovable-uploads/0abfa0b3-7f64-4661-a4d4-52cf395f1d90.png",
-    "/lovable-uploads/1d7ff204-1f12-485d-807f-06cde4656bfe.png",
-    "/lovable-uploads/aefb88e5-9912-4de1-926c-1f4643ecffe5.png",
-  ];
+  const [api, setApi] = useState<CarouselApi | null>(null);
 
-  // Handle carousel selection
+  const productImages = [...product.images];
+
+  // Update the current slide when selection changes
   const onSelect = () => {
-    if (!api) return;
-    setCurrentSlide(api.selectedScrollSnap() + 1);
+    if (api) {
+      setCurrentSlide(api.selectedScrollSnap() + 1);
+    }
   };
 
+  // Handle thumbnail clicks
   const handleThumbnailClick = (index: number) => {
-    if (!api) return;
-    api.scrollTo(index);
+    if (api) {
+      api.scrollTo(index);
+      setCurrentSlide(index + 1);
+    }
   };
 
   return (
     <div className="space-y-4">
       <div className="relative">
-        <Carousel 
-          className="w-full" 
-          setApi={setApi}
-          onSelect={onSelect}
-        >
+        <Carousel className="w-full" setApi={setApi} onSelect={onSelect}>
           <CarouselContent>
             {productImages.map((image, index) => (
               <CarouselItem key={index}>
@@ -57,8 +51,8 @@ export function ProductImageCarousel({ product }: ProductImageCarouselProps) {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white/80 text-black p-2 rounded-full shadow-md hover:bg-white" />
+          <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white/80 text-black p-2 rounded-full shadow-md hover:bg-white" />
         </Carousel>
         <div className="absolute bottom-4 right-4 bg-black/60 text-white px-2 py-1 rounded-md text-sm">
           {currentSlide} / {productImages.length}
@@ -71,7 +65,7 @@ export function ProductImageCarousel({ product }: ProductImageCarouselProps) {
             key={index}
             onClick={() => handleThumbnailClick(index)}
             className={`aspect-square overflow-hidden rounded-lg border-2 ${
-              currentSlide === index + 1 ? 'border-primary' : 'border-transparent'
+              currentSlide === index + 1 ? "border-primary" : "border-transparent"
             }`}
           >
             <img

@@ -9,6 +9,7 @@ import { Product } from "@/types/product";
 import { ProductSpecifications } from "@/components/products/ProductSpecifications";
 
 import { faker } from '@faker-js/faker';
+import { ProductImageCarousel } from "@/components/products/ProductImageCarousel";
 
 // Mock function to fetch product - replace with actual data fetching
 
@@ -84,30 +85,7 @@ export function ProductView() {
       
       <div className="grid lg:grid-cols-2 gap-8">
         <div className="space-y-4">
-          <div className="aspect-square overflow-hidden rounded-lg">
-            <img
-              src={productImages[selectedImage]}
-              alt={`${product.name} - View ${selectedImage + 1}`}
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <div className="inline-flex gap-2">
-            {product.images.map((image, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectedImage(index)}
-                className={`aspect-square overflow-hidden rounded-lg border-2 h-16 w-16 ${
-                  selectedImage === index ? 'border-primary' : 'border-transparent'
-                }`}
-              >
-                <img
-                  src={image}
-                  alt={`${product.name} - Thumbnail ${index + 1}`}
-                  className="h-full w-full object-cover"
-                />
-              </button>
-            ))}
-          </div>
+          <ProductImageCarousel product={product}/>
         </div>
         
         <div className="space-y-6">
