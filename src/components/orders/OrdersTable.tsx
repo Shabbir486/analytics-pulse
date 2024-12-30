@@ -28,6 +28,8 @@ import { Order, OrderStatus } from "@/types/order";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { Switch } from "../ui/switch";
+import { ArrowUpDown } from "lucide-react";
+import { SortConfig, SortDirection, sortData } from "@/utils/sorting";
 
 interface OrdersTableProps {
   statusFilter: OrderStatus | "all";
@@ -46,6 +48,7 @@ export function OrdersTable({
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isDense, setIsDense] = useState(false);
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
 
   const toggleRow = (orderId: string) => {
     const newExpandedRows = new Set(expandedRows);
@@ -73,11 +76,28 @@ export function OrdersTable({
     return matchesStatus && matchesSearch && matchesDate;
   });
 
+  // Sorting logic
+  const handleSort = (key: string) => {
+    let direction: SortDirection = "asc";
+    
+    if (sortConfig && sortConfig.key === key) {
+      if (sortConfig.direction === "asc") {
+        direction = "desc";
+      } else if (sortConfig.direction === "desc") {
+        direction = null;
+      }
+    }
+
+    setSortConfig(direction ? { key, direction } : null);
+  };
+
+  const sortedOrders = sortData(filteredOrders, sortConfig);
+
   // Calculate pagination
-  const totalPages = Math.ceil(filteredOrders.length / rowsPerPage);
+  const totalPages = Math.ceil(sortedOrders.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
-  const currentOrders = filteredOrders.slice(startIndex, endIndex);
+  const currentOrders = sortedOrders.slice(startIndex, endIndex);
 
   const getStatusBadgeVariant = (status: OrderStatus) => {
     switch (status) {
@@ -94,6 +114,17 @@ export function OrdersTable({
     }
   };
 
+  const renderSortableHeader = (label: string, key: string) => (
+    <Button
+      variant="ghost"
+      onClick={() => handleSort(key)}
+      className="h-8 flex items-center gap-1 font-semibold"
+    >
+      {label}
+      <ArrowUpDown className="h-4 w-4" />
+    </Button>
+  );
+
   return (
     <div className="space-y-4">
       <div className="inline-flex items-center gap-2">
@@ -105,12 +136,12 @@ export function OrdersTable({
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]"></TableHead>
-              <TableHead>Order ID</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Items</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>{renderSortableHeader("Order ID", "id")}</TableHead>
+              <TableHead>{renderSortableHeader("Customer", "customer.name")}</TableHead>
+              <TableHead>{renderSortableHeader("Date", "date")}</TableHead>
+              <TableHead>{renderSortableHeader("Items", "items.length")}</TableHead>
+              <TableHead>{renderSortableHeader("Price", "totalPrice")}</TableHead>
+              <TableHead>{renderSortableHeader("Status", "status")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

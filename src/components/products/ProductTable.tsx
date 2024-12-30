@@ -14,6 +14,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { ArrowUpDown } from "lucide-react";
+import { SortConfig, SortDirection, sortData } from "@/utils/sorting";
 
 interface ProductTableProps {
   products: Product[];
@@ -51,6 +53,7 @@ export function ProductTable({
   const navigate = useNavigate();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
 
   const handleView = (product: Product) => {
     navigate(`/products/${product.id}`);
@@ -71,6 +74,34 @@ export function ProductTable({
     }
   };
 
+  const handleSort = (key: string) => {
+    let direction: SortDirection = "asc";
+    
+    if (sortConfig && sortConfig.key === key) {
+      if (sortConfig.direction === "asc") {
+        direction = "desc";
+      } else if (sortConfig.direction === "desc") {
+        direction = null;
+      }
+    }
+
+    setSortConfig(direction ? { key, direction } : null);
+  };
+
+  const sortedProducts = sortData(products, sortConfig);
+  const paginatedProducts = sortedProducts.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+  const renderSortableHeader = (label: string, key: string) => (
+    <Button
+      variant="ghost"
+      onClick={() => handleSort(key)}
+      className="h-8 flex items-center gap-1 font-semibold"
+    >
+      {label}
+      <ArrowUpDown className="h-4 w-4" />
+    </Button>
+  );
+
   return (
     <>
       <div className="rounded-md border">
@@ -83,16 +114,16 @@ export function ProductTable({
                   onCheckedChange={onSelectAll}
                 />
               </TableHead>
-              {columnVisibility.product && <TableHead>Product</TableHead>}
-              {columnVisibility.createAt && <TableHead>Create at</TableHead>}
-              {columnVisibility.stock && <TableHead>Stock</TableHead>}
-              {columnVisibility.price && <TableHead>Price</TableHead>}
-              {columnVisibility.status && <TableHead>Status</TableHead>}
+              {columnVisibility.product && <TableHead>{renderSortableHeader("Product", "name")}</TableHead>}
+              {columnVisibility.createAt && <TableHead>{renderSortableHeader("Create at", "createdAt")}</TableHead>}
+              {columnVisibility.stock && <TableHead>{renderSortableHeader("Stock", "stock")}</TableHead>}
+              {columnVisibility.price && <TableHead>{renderSortableHeader("Price", "price")}</TableHead>}
+              {columnVisibility.status && <TableHead>{renderSortableHeader("Status", "status")}</TableHead>}
               <TableHead className="w-24">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => (
+            {paginatedProducts.map((product) => (
               <TableRow key={product.id}>
                 <TableCell>
                   <Checkbox 

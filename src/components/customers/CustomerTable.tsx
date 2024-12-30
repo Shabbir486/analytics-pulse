@@ -3,7 +3,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
+import { ArrowUpDown, Pencil } from "lucide-react";
 import { useState } from "react";
 import { mockCustomers } from "./mockData";
 import { 
@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { SortConfig, SortDirection, sortData } from "@/utils/sorting";
 
 interface CustomerTableProps {
   selectedTab: string;
@@ -26,6 +27,21 @@ export function CustomerTable({ selectedTab, searchQuery, roleFilter }: Customer
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isDense, setIsDense] = useState(false);
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+
+  const handleSort = (key: string) => {
+    let direction: SortDirection = "asc";
+    
+    if (sortConfig && sortConfig.key === key) {
+      if (sortConfig.direction === "asc") {
+        direction = "desc";
+      } else if (sortConfig.direction === "desc") {
+        direction = null;
+      }
+    }
+
+    setSortConfig(direction ? { key, direction } : null);
+  };
 
   const filteredCustomers = mockCustomers.filter((customer) => {
     const matchesTab = selectedTab === "all" || customer.status.toLowerCase() === selectedTab;
@@ -38,10 +54,11 @@ export function CustomerTable({ selectedTab, searchQuery, roleFilter }: Customer
     return matchesTab && matchesSearch && matchesRole;
   });
 
-  const totalPages = Math.ceil(filteredCustomers.length / rowsPerPage);
+  const sortedCustomers = sortData(filteredCustomers, sortConfig);
+  const totalPages = Math.ceil(sortedCustomers.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
-  const currentCustomers = filteredCustomers.slice(startIndex, endIndex);
+  const currentCustomers = sortedCustomers.slice(startIndex, endIndex);
 
   const toggleSelectAll = () => {
     if (selectedCustomers.length === currentCustomers.length) {
@@ -69,6 +86,17 @@ export function CustomerTable({ selectedTab, searchQuery, roleFilter }: Customer
     }
   };
 
+  const renderSortableHeader = (label: string, key: string) => (
+    <Button
+      variant="ghost"
+      onClick={() => handleSort(key)}
+      className="h-8 flex items-center gap-1 font-semibold"
+    >
+      {label}
+      <ArrowUpDown className="h-4 w-4" />
+    </Button>
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -86,11 +114,11 @@ export function CustomerTable({ selectedTab, searchQuery, roleFilter }: Customer
                   onCheckedChange={toggleSelectAll}
                 />
               </TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Phone number</TableHead>
-              <TableHead>Company</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>{renderSortableHeader("Name", "name")}</TableHead>
+              <TableHead>{renderSortableHeader("Phone number", "phone")}</TableHead>
+              <TableHead>{renderSortableHeader("Company", "company")}</TableHead>
+              <TableHead>{renderSortableHeader("Role", "role")}</TableHead>
+              <TableHead>{renderSortableHeader("Status", "status")}</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
@@ -156,7 +184,7 @@ export function CustomerTable({ selectedTab, searchQuery, roleFilter }: Customer
             </SelectContent>
           </Select>
           <span className="text-sm text-muted-foreground">
-            {startIndex + 1}-{Math.min(endIndex, filteredCustomers.length)} of {filteredCustomers.length}
+            {startIndex + 1}-{Math.min(endIndex, sortedCustomers.length)} of {sortedCustomers.length}
           </span>
         </div>
       </div>
