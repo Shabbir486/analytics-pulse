@@ -25,7 +25,6 @@ export function AccountSettings() {
       <Tabs defaultValue="general" className="w-full">
         <TabsList className="w-full justify-start">
           <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="billing">Billing</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="social-links">Social Links</TabsTrigger>
