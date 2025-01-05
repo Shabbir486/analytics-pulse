@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AdminLayout } from "./components/layout/AdminLayout";
 import { Dashboard } from "./pages/Dashboard";
-import { Users } from "./pages/Users";
+import Users from "./pages/Users";
 import { Products } from "./pages/Products";
 import { ProductView } from "./pages/ProductView";
 import { Orders } from "./pages/Orders";
