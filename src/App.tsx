@@ -1,17 +1,17 @@
-import { Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AdminLayout } from "./components/layout/AdminLayout";
-import { Dashboard } from "./components/dashboard/Dashboard";
-import { Users } from "./components/users/Users";
-import { Products } from "./components/products/Products";
-import { ProductView } from "./components/products/ProductView";
-import { Orders } from "./components/orders/Orders";
-import { Customers } from "./components/customers/Customers";
+import { Dashboard } from "./pages/Dashboard";
+import { Users } from "./pages/Users";
+import { Products } from "./pages/Products";
+import { ProductView } from "./pages/ProductView";
+import { Orders } from "./pages/Orders";
+import { Customers } from "./pages/Customers";
 import { AccountSettings } from "./components/account/AccountSettings";
 
 export default function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
         <Route path="/" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
@@ -24,6 +24,6 @@ export default function App() {
         </Route>
       </Routes>
       <Toaster />
-    </Router>
+    </BrowserRouter>
   );
 }

@@ -1,27 +1,21 @@
 import { UsersList } from "@/components/users/UsersList";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from "@/components/ui/breadcrumb";
-import { Home } from "lucide-react";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@/components/ui/breadcrumb";
+import { ChevronRight } from "lucide-react";
 
-export default function Users() {
+export function Users() {
   return (
-    <div className="space-y-6">
+    <div className="container py-6 space-y-6">
       <div>
         <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/" className="flex items-center gap-2">
-                <Home className="h-4 w-4" />
-                Dashboard
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/users">Users</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbItem>
-              <BreadcrumbLink>List</BreadcrumbLink>
-            </BreadcrumbItem>
-          </BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbItem>
+            <ChevronRight className="h-4 w-4" />
+            <BreadcrumbLink>Users</BreadcrumbLink>
+          </BreadcrumbItem>
         </Breadcrumb>
+        <h1 className="text-3xl font-bold mt-2">Users</h1>
       </div>
       <UsersList />
     </div>
