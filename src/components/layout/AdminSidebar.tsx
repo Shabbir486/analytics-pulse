@@ -49,9 +49,9 @@ const menuItems = [
         url: "/orders",
       },
       {
-        title: "Customers",
+        title: "Users",
         icon: Users,
-        url: "/customers",
+        url: "/users",
       },
     ],
   },
@@ -69,7 +69,7 @@ const menuItems = [
 
 export function AdminSidebar() {
   return (
-    <Sidebar >
+    <Sidebar>
       <div className="p-4 bg-gray-50">
         <h1 className="text-xl font-semibold">Naayaab (Admin Panel)</h1>
       </div>
@@ -78,7 +78,7 @@ export function AdminSidebar() {
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu >
+              <SidebarMenu>
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>

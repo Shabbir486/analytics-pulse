@@ -1,21 +1,23 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { AdminLayout } from "@/components/layout/AdminLayout";
-import { Dashboard } from "@/pages/Dashboard";
-import { Products } from "@/pages/Products";
-import { Orders } from "@/pages/Orders";
-import { Customers } from "@/pages/Customers";
-import { ProductView } from "./pages/ProductView";
+import { AdminLayout } from "./components/layout/AdminLayout";
+import Dashboard from "./pages/Dashboard";
+import Products from "./pages/Products";
+import Orders from "./pages/Orders";
+import Users from "./pages/Users";
+import { Toaster } from "./components/ui/sonner";
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<AdminLayout><Dashboard /></AdminLayout>} />
-        <Route path="/products" element={<AdminLayout><Products /></AdminLayout>} />
-        <Route path="products/:id" element={<ProductView />} />
-        <Route path="/orders" element={<AdminLayout><Orders /></AdminLayout>} />
-        <Route path="/customers" element={<AdminLayout><Customers /></AdminLayout>} />
-      </Routes>
+      <AdminLayout>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/users" element={<Users />} />
+        </Routes>
+      </AdminLayout>
+      <Toaster />
     </Router>
   );
 }
