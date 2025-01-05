@@ -39,6 +39,11 @@ const menuItems = [
     label: "Management",
     items: [
       {
+        title: "Users",
+        icon: Users,
+        url: "/users",
+      },
+      {
         title: "Products",
         icon: Box,
         url: "/products",
@@ -49,10 +54,10 @@ const menuItems = [
         url: "/orders",
       },
       {
-        title: "Users",
+        title: "Customers",
         icon: Users,
-        url: "/users",
-      },
+        url: "/customers",
+      }
     ],
   },
   {
