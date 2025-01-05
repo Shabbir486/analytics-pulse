@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { SortConfig, SortDirection, sortData } from "@/utils/sorting";
+import { EditUserDialog } from "./EditUserDialog";
+import { User } from "@/types/user";
 
 interface UserTableProps {
   selectedTab: string;
@@ -28,6 +30,8 @@ export function UserTable({ selectedTab, searchQuery, roleFilter }: UserTablePro
   const [isDense, setIsDense] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const handleSort = (key: string) => {
     let direction: SortDirection = "asc";
@@ -138,9 +142,15 @@ export function UserTable({ selectedTab, searchQuery, roleFilter }: UserTablePro
                     </Avatar>
                     <div className="flex flex-col">
                       <span className="font-medium">{user.name}</span>
-                      <span className="text-sm text-muted-foreground">
+                      <button 
+                        className="text-sm text-muted-foreground text-left hover:text-primary"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setIsEditDialogOpen(true);
+                        }}
+                      >
                         {user.email}
-                      </span>
+                      </button>
                     </div>
                   </div>
                 </TableCell>
@@ -153,7 +163,14 @@ export function UserTable({ selectedTab, searchQuery, roleFilter }: UserTablePro
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Button variant="ghost" size="icon">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => {
+                      setSelectedUser(user);
+                      setIsEditDialogOpen(true);
+                    }}
+                  >
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </TableCell>
@@ -188,6 +205,12 @@ export function UserTable({ selectedTab, searchQuery, roleFilter }: UserTablePro
           </span>
         </div>
       </div>
+
+      <EditUserDialog 
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        user={selectedUser}
+      />
     </div>
   );
 }
