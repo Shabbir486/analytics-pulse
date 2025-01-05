@@ -22,8 +22,9 @@ export function AccountGeneral() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = (e: any) => {
-      const file = e.target.files[0];
+    input.onchange = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      const file = target.files[0];
       if (file) {
         setAvatar("/lovable-uploads/131888a4-1a65-4e2a-96cc-eaa83a7e4ac5.png");
       }

@@ -72,14 +72,14 @@ export function AccountNotifications() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
+      <Card className="flex py-4 px-3">
+        <CardHeader className="flex-1 p-1">
           <CardTitle>Activity</CardTitle>
           <CardDescription>
-            Donec mi odio, faucibus at, scelerisque quis
+            Manage your activity notification settings below.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="border rounded-md flex-1 space-y-3 py-2">
           {activityNotifications.map((notification) => (
             <div
               key={notification.id}
@@ -97,14 +97,14 @@ export function AccountNotifications() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
+      <Card className="flex py-4 px-3">
+        <CardHeader className="flex-1 p-1">
           <CardTitle>Application</CardTitle>
-          <CardDescription>
-            Donec mi odio, faucibus at, scelerisque quis
-          </CardDescription>
+            <CardDescription>
+            Manage your application notification settings below.
+            </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="border rounded-md flex-1 space-y-4 py-2">
           {applicationNotifications.map((notification) => (
             <div
               key={notification.id}

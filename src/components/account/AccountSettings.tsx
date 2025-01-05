@@ -1,6 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AccountGeneral } from "./AccountGeneral";
-import { AccountBilling } from "./AccountBilling";
 import { AccountNotifications } from "./AccountNotifications";
 import { AccountSecurity } from "./AccountSecurity";
 import { AccountSocialLinks } from "./AccountSocialLinks";
@@ -9,7 +8,7 @@ import { ChevronRight } from "lucide-react";
 
 export function AccountSettings() {
   return (
-    <div className="container py-6 space-y-6">
+    <div className="space-y-6">
       <div>
         <Breadcrumb>
           <BreadcrumbItem>
@@ -33,9 +32,6 @@ export function AccountSettings() {
         </TabsList>
         <TabsContent value="general">
           <AccountGeneral />
-        </TabsContent>
-        <TabsContent value="billing">
-          <AccountBilling />
         </TabsContent>
         <TabsContent value="notifications">
           <AccountNotifications />
