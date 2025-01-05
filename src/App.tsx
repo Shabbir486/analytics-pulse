@@ -1,29 +1,29 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Router, Routes, Route } from "react-router-dom";
+import { Toaster } from "sonner";
 import { AdminLayout } from "./components/layout/AdminLayout";
-import { Dashboard } from "@/pages/Dashboard";
-import { Products } from "@/pages/Products";
-import { Orders } from "@/pages/Orders";
-import { Customers } from "@/pages/Customers";
-import { ProductView } from "./pages/ProductView";
-import Users from "./pages/Users";
-import { Toaster } from "./components/ui/sonner";
+import { Dashboard } from "./components/dashboard/Dashboard";
+import { Users } from "./components/users/Users";
+import { Products } from "./components/products/Products";
+import { ProductView } from "./components/products/ProductView";
+import { Orders } from "./components/orders/Orders";
+import { Customers } from "./components/customers/Customers";
+import { AccountSettings } from "./components/account/AccountSettings";
 
-function App() {
+export default function App() {
   return (
     <Router>
-      <AdminLayout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/products" element={<Products />} />
+      <Routes>
+        <Route path="/" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="users" element={<Users />} />
+          <Route path="products" element={<Products />} />
           <Route path="products/:id" element={<ProductView />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/customers" element={<Customers />} />
-          <Route path="/users" element={<Users />} />
-        </Routes>
-      </AdminLayout>
+          <Route path="orders" element={<Orders />} />
+          <Route path="customers" element={<Customers />} />
+          <Route path="account-settings" element={<AccountSettings />} />
+        </Route>
+      </Routes>
       <Toaster />
     </Router>
   );
 }
-
-export default App;
