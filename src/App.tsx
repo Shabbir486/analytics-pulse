@@ -13,12 +13,12 @@ function App() {
     <Router>
       <AdminLayout>
         <Routes>
-        <Route path="/" element={<AdminLayout><Dashboard /></AdminLayout>} />
-        <Route path="/products" element={<AdminLayout><Products /></AdminLayout>} />
-        <Route path="products/:id" element={<ProductView />} />
-        <Route path="/orders" element={<AdminLayout><Orders /></AdminLayout>} />
-        <Route path="/customers" element={<AdminLayout><Customers /></AdminLayout>} />
-          <Route path="/users" element={<AdminLayout><Users /></AdminLayout>} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="products/:id" element={<ProductView />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/customers" element={<Customers />} />
+          <Route path="/users" element={<Users />} />
         </Routes>
       </AdminLayout>
       <Toaster />
