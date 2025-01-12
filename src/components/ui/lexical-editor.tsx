@@ -12,6 +12,7 @@ import { LinkNode } from "@lexical/link";
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
+import { CodeNode } from '@lexical/code';
 import { Button } from "./button";
 import { Bold, Italic, Underline, Link, List, Quote, Heading1 } from "lucide-react";
 
@@ -106,7 +107,8 @@ export function LexicalEditor({ onChange, initialValue = "", className = "" }: L
       ListNode,
       ListItemNode,
       LinkNode,
-      HorizontalRuleNode
+      HorizontalRuleNode,
+      CodeNode
     ],
     theme: {
       paragraph: 'mb-1',
