@@ -17,6 +17,13 @@ export function LexicalEditor({ onChange, initialValue = "", className = "" }: L
     namespace: 'ProductDescription',
     onError: (error: Error) => console.error(error),
     nodes: [],
+    theme: {
+      paragraph: 'mb-1',
+      text: {
+        base: 'text-sm text-foreground',
+      },
+    },
+    editable: true,
     editorState: () => {
       const root = $getRoot();
       if (root.getFirstChild() === null && initialValue) {
@@ -29,15 +36,15 @@ export function LexicalEditor({ onChange, initialValue = "", className = "" }: L
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className={`relative border border-input rounded-md ${className}`}>
+      <div className={`relative min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background ${className}`}>
         <PlainTextPlugin
           contentEditable={
             <ContentEditable 
-              className="min-h-[80px] px-3 py-2 outline-none"
+              className="min-h-[80px] outline-none"
             />
           }
           placeholder={
-            <div className="absolute top-[11px] left-[13px] text-muted-foreground pointer-events-none">
+            <div className="absolute top-[11px] left-[13px] text-sm text-muted-foreground pointer-events-none">
               Enter description...
             </div>
           }
