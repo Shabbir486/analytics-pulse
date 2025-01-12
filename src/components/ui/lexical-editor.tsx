@@ -11,6 +11,7 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { LinkNode } from "@lexical/link";
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 import { Button } from "./button";
 import { Bold, Italic, Underline, Link, List, Quote, Heading1 } from "lucide-react";
 
@@ -99,7 +100,14 @@ export function LexicalEditor({ onChange, initialValue = "", className = "" }: L
   const initialConfig = {
     namespace: 'ProductDescription',
     onError: (error: Error) => console.error(error),
-    nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, LinkNode],
+    nodes: [
+      HeadingNode,
+      QuoteNode,
+      ListNode,
+      ListItemNode,
+      LinkNode,
+      HorizontalRuleNode
+    ],
     theme: {
       paragraph: 'mb-1',
       text: {
