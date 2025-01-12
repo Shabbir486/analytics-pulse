@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Product } from "@/types/product";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -9,6 +8,7 @@ import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { LexicalEditor } from "@/components/ui/lexical-editor";
 
 interface ProductFormProps {
   initialData?: Product | null;
@@ -91,7 +91,11 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
         <div className="space-y-2">
           <Label htmlFor="description">Description</Label>
-          <Textarea id="description" {...register("description")} />
+          <LexicalEditor
+            onChange={(value) => setValue("description", value)}
+            initialValue={watch("description")}
+            className="bg-background"
+          />
         </div>
 
         <div className="space-y-2">
