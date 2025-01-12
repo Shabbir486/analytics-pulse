@@ -15,6 +15,14 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { SortConfig, SortDirection, sortData } from "@/utils/sorting";
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface CustomerTableProps {
   selectedTab: string;
@@ -183,10 +191,47 @@ export function CustomerTable({ selectedTab, searchQuery, roleFilter }: Customer
               <SelectItem value="50">50</SelectItem>
             </SelectContent>
           </Select>
-          <span className="text-sm text-muted-foreground">
-            {startIndex + 1}-{Math.min(endIndex, sortedCustomers.length)} of {sortedCustomers.length}
-          </span>
         </div>
+
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+              >
+                <PaginationPrevious className="h-4 w-4" />
+              </Button>
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <PaginationItem key={page}>
+                <Button
+                  variant={currentPage === page ? "default" : "ghost"}
+                  size="icon"
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </Button>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+              >
+                <PaginationNext className="h-4 w-4" />
+              </Button>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+
+        <span className="text-sm text-muted-foreground">
+          {startIndex + 1}-{Math.min(endIndex, sortedCustomers.length)} of {sortedCustomers.length}
+        </span>
       </div>
     </div>
   );
