@@ -9,6 +9,7 @@ import { Orders } from "./pages/Orders";
 import { Customers } from "./pages/Customers";
 import { AccountSettings } from "./components/account/AccountSettings";
 import { Analytics } from "./pages/Analytics";
+import './App.css'
 
 export default function App() {
   return (

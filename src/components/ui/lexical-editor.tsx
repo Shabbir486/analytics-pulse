@@ -1,173 +1,158 @@
-import { LexicalComposer } from "@lexical/react/LexicalComposer";
-import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { ContentEditable } from "@lexical/react/LexicalContentEditable";
-import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
-import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
-import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
-import { $getRoot, $createParagraphNode, $createTextNode, EditorState } from 'lexical';
-import { HeadingNode, QuoteNode } from "@lexical/rich-text";
-import { ListNode, ListItemNode } from "@lexical/list";
-import { ListPlugin } from "@lexical/react/LexicalListPlugin";
-import { LinkNode } from "@lexical/link";
-import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
-import { CodeNode } from '@lexical/code';
-import { Button } from "./button";
-import { Bold, Italic, Underline, Link, List, Quote, Heading1 } from "lucide-react";
+import {AutoFocusPlugin} from '@lexical/react/LexicalAutoFocusPlugin';
+import {LexicalComposer} from '@lexical/react/LexicalComposer';
+import {ContentEditable} from '@lexical/react/LexicalContentEditable';
+import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
+import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
+import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
+import {
+  $isTextNode,
+  DOMConversionMap,
+  DOMExportOutput,
+  DOMExportOutputMap,
+  isHTMLElement,
+  Klass,
+  LexicalEditor,
+  LexicalNode,
+  ParagraphNode,
+  TextNode,
+} from 'lexical';
 
-function Toolbar() {
-  const [editor] = useLexicalComposerContext();
+import LexicalTheme from '@/LexicalTheme';
+import ToolbarPlugin from '@/plugins/ToolbarPlugin';
+import {parseAllowedColor, parseAllowedFontSize} from '@/lexicalStyleConfig'
 
-  const formatText = (format: string) => {
-    editor.update(() => {
-      const selection = window.getSelection();
-      if (selection) {
-        document.execCommand(format, false);
+const placeholder = 'Enter the description';
+
+const removeStylesExportDOM = (
+  editor: LexicalEditor,
+  target: LexicalNode,
+): DOMExportOutput => {
+  const output = target.exportDOM(editor);
+  if (output && isHTMLElement(output.element)) {
+    // Remove all inline styles and classes if the element is an HTMLElement
+    // Children are checked as well since TextNode can be nested
+    // in i, b, and strong tags.
+    for (const el of [
+      output.element,
+      ...output.element.querySelectorAll('[style],[class],[dir="ltr"]'),
+    ]) {
+      el.removeAttribute('class');
+      el.removeAttribute('style');
+      if (el.getAttribute('dir') === 'ltr') {
+        el.removeAttribute('dir');
       }
-    });
-  };
+    }
+  }
+  return output;
+};
 
-  return (
-    <div className="flex items-center gap-1 p-1 border-b">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => formatText('bold')}
-        className="h-8 w-8"
-      >
-        <Bold className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => formatText('italic')}
-        className="h-8 w-8"
-      >
-        <Italic className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => formatText('underline')}
-        className="h-8 w-8"
-      >
-        <Underline className="h-4 w-4" />
-      </Button>
-      <div className="w-[1px] h-4 bg-border mx-1" />
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => formatText('insertUnorderedList')}
-        className="h-8 w-8"
-      >
-        <List className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => formatText('formatBlock')}
-        className="h-8 w-8"
-      >
-        <Quote className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => formatText('heading')}
-        className="h-8 w-8"
-      >
-        <Heading1 className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => formatText('createLink')}
-        className="h-8 w-8"
-      >
-        <Link className="h-4 w-4" />
-      </Button>
-    </div>
-  );
-}
+const exportMap: DOMExportOutputMap = new Map<
+  Klass<LexicalNode>,
+  (editor: LexicalEditor, target: LexicalNode) => DOMExportOutput
+>([
+  [ParagraphNode, removeStylesExportDOM],
+  [TextNode, removeStylesExportDOM],
+]);
 
-interface LexicalEditorProps {
-  onChange?: (value: string) => void;
-  initialValue?: string;
-  className?: string;
-}
+const getExtraStyles = (element: HTMLElement): string => {
+  // Parse styles from pasted input, but only if they match exactly the
+  // sort of styles that would be produced by exportDOM
+  let extraStyles = '';
+  const fontSize = parseAllowedFontSize(element.style.fontSize);
+  const backgroundColor = parseAllowedColor(element.style.backgroundColor);
+  const color = parseAllowedColor(element.style.color);
+  if (fontSize !== '' && fontSize !== '15px') {
+    extraStyles += `font-size: ${fontSize};`;
+  }
+  if (backgroundColor !== '' && backgroundColor !== 'rgb(255, 255, 255)') {
+    extraStyles += `background-color: ${backgroundColor};`;
+  }
+  if (color !== '' && color !== 'rgb(0, 0, 0)') {
+    extraStyles += `color: ${color};`;
+  }
+  return extraStyles;
+};
 
-export function LexicalEditor({ onChange, initialValue = "", className = "" }: LexicalEditorProps) {
-  const initialConfig = {
-    namespace: 'ProductDescription',
-    onError: (error: Error) => console.error(error),
-    nodes: [
-      HeadingNode,
-      QuoteNode,
-      ListNode,
-      ListItemNode,
-      LinkNode,
-      HorizontalRuleNode,
-      CodeNode
-    ],
-    theme: {
-      paragraph: 'mb-1',
-      text: {
-        base: 'text-sm text-foreground',
-        bold: 'font-bold',
-        italic: 'italic',
-        underline: 'underline',
-        strikethrough: 'line-through',
-        underlineStrikethrough: 'underline line-through',
-      },
-      list: {
-        ul: 'list-disc list-inside',
-        ol: 'list-decimal list-inside',
-      },
-      quote: 'border-l-4 border-gray-200 pl-4 italic',
-    },
-    editable: true,
-    editorState: () => {
-      const root = $getRoot();
-      if (root.getFirstChild() === null && initialValue) {
-        const paragraph = $createParagraphNode();
-        paragraph.append($createTextNode(initialValue));
-        root.append(paragraph);
+const constructImportMap = (): DOMConversionMap => {
+  const importMap: DOMConversionMap = {};
+
+  // Wrap all TextNode importers with a function that also imports
+  // the custom styles implemented by the playground
+  for (const [tag, fn] of Object.entries(TextNode.importDOM() || {})) {
+    importMap[tag] = (importNode) => {
+      const importer = fn(importNode);
+      if (!importer) {
+        return null;
       }
-    },
-  };
+      return {
+        ...importer,
+        conversion: (element) => {
+          const output = importer.conversion(element);
+          if (
+            output === null ||
+            output.forChild === undefined ||
+            output.after !== undefined ||
+            output.node !== null
+          ) {
+            return output;
+          }
+          const extraStyles = getExtraStyles(element);
+          if (extraStyles) {
+            const {forChild} = output;
+            return {
+              ...output,
+              forChild: (child, parent) => {
+                const textNode = forChild(child, parent);
+                if ($isTextNode(textNode)) {
+                  textNode.setStyle(textNode.getStyle() + extraStyles);
+                }
+                return textNode;
+              },
+            };
+          }
+          return output;
+        },
+      };
+    };
+  }
 
+  return importMap;
+};
+
+const editorConfig = {
+  html: {
+    export: exportMap,
+    import: constructImportMap(),
+  },
+  namespace: 'Custom Lexical Editor',
+  nodes: [ParagraphNode, TextNode],
+  onError(error: Error) {
+    throw error;
+  },
+  theme: LexicalTheme,
+};
+
+export function MyLexicalEditor() {
   return (
-    <LexicalComposer initialConfig={initialConfig}>
-      <div className={`relative min-h-[120px] w-full rounded-md border border-input bg-background ring-offset-background ${className}`}>
-        <Toolbar />
-        <div className="px-3 py-2">
+    <LexicalComposer initialConfig={editorConfig}>
+      <div className="border rounded-sm w-full leading-3">
+        <ToolbarPlugin />
+        <div className="editor-inner">
           <RichTextPlugin
             contentEditable={
-              <ContentEditable 
-                className="min-h-[80px] outline-none"
+              <ContentEditable
+                className="editor-input"
+                aria-placeholder={placeholder}
+                placeholder={
+                  <div className="editor-placeholder">{placeholder}</div>
+                }
               />
-            }
-            placeholder={
-              <div className="absolute top-[52px] left-[13px] text-sm text-muted-foreground pointer-events-none">
-                Enter description...
-              </div>
             }
             ErrorBoundary={LexicalErrorBoundary}
           />
+          <HistoryPlugin />
+          <AutoFocusPlugin />
         </div>
-        <HistoryPlugin />
-        <ListPlugin />
-        <MarkdownShortcutPlugin />
-        <OnChangePlugin
-          onChange={(editorState: EditorState) => {
-            editorState.read(() => {
-              const root = $getRoot();
-              const text = root.getTextContent();
-              onChange?.(text);
-            });
-          }}
-        />
       </div>
     </LexicalComposer>
   );
