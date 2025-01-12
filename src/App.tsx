@@ -8,6 +8,7 @@ import { ProductView } from "./pages/ProductView";
 import { Orders } from "./pages/Orders";
 import { Customers } from "./pages/Customers";
 import { AccountSettings } from "./components/account/AccountSettings";
+import { Analytics } from "./pages/Analytics";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="products/:id" element={<ProductView />} />
           <Route path="orders" element={<Orders />} />
           <Route path="customers" element={<Customers />} />
+          <Route path="analytics" element={<Analytics />} />
           <Route path="account-settings" element={<AccountSettings />} />
         </Route>
       </Routes>
