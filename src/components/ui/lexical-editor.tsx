@@ -11,7 +11,7 @@ import {
   $createQuoteNode
 } from '@lexical/rich-text';
 import {ListPlugin} from '@lexical/react/LexicalListPlugin';
-import {ListNode, ListItemNode} from '@lexical/list';
+import {ListNode, ListItemNode, INSERT_UNORDERED_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND} from '@lexical/list';
 import {LinkNode, TOGGLE_LINK_COMMAND} from '@lexical/link';
 import {MarkdownShortcutPlugin} from '@lexical/react/LexicalMarkdownShortcutPlugin';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
@@ -34,9 +34,9 @@ import {
   AlignJustify,
   Maximize2
 } from "lucide-react";
-import {$getSelection, $isRangeSelection} from 'lexical';
+import {$getSelection, $isRangeSelection, TextFormatType} from 'lexical';
 import {$setBlocksType} from '@lexical/selection';
-import {INSERT_UNORDERED_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND} from '@lexical/list';
+import {FORMAT_ELEMENT_COMMAND, INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND} from '@lexical/commands';
 import {
   Select,
   SelectContent,
@@ -59,7 +59,7 @@ const Toolbar = () => {
     });
   };
 
-  const formatText = (format: string) => {
+  const formatText = (format: TextFormatType) => {
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
