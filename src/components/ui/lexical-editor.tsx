@@ -8,9 +8,7 @@ import {
   HeadingNode, 
   QuoteNode,
   $createHeadingNode,
-  $createQuoteNode,
-  $setBlocksType,
-  FORMAT_ELEMENT_COMMAND
+  $createQuoteNode
 } from '@lexical/rich-text';
 import {ListPlugin} from '@lexical/react/LexicalListPlugin';
 import {ListNode, ListItemNode} from '@lexical/list';
@@ -22,6 +20,8 @@ import {CodeNode} from '@lexical/code';
 import {Button} from "./button";
 import {Bold, Italic, Underline, Link, List, Quote, Heading1} from "lucide-react";
 import {$getSelection, $isRangeSelection} from 'lexical';
+import {$setBlocksType} from '@lexical/selection';
+import {FORMAT_ELEMENT_COMMAND} from '@lexical/commands';
 
 import LexicalTheme from '@/LexicalTheme';
 import {parseAllowedColor, parseAllowedFontSize} from '@/lexicalStyleConfig';
