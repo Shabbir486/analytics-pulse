@@ -4,7 +4,13 @@ import {ContentEditable} from '@lexical/react/LexicalContentEditable';
 import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
 import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
 import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
-import {HeadingNode, QuoteNode} from '@lexical/rich-text';
+import {
+  HeadingNode, 
+  QuoteNode,
+  $createHeadingNode,
+  $createQuoteNode,
+  FORMAT_QUOTE_COMMAND
+} from '@lexical/rich-text';
 import {ListPlugin} from '@lexical/react/LexicalListPlugin';
 import {ListNode, ListItemNode} from '@lexical/list';
 import {LinkNode} from '@lexical/link';
@@ -14,6 +20,7 @@ import {HorizontalRuleNode} from '@lexical/react/LexicalHorizontalRuleNode';
 import {CodeNode} from '@lexical/code';
 import {Button} from "./button";
 import {Bold, Italic, Underline, Link, List, Quote, Heading1} from "lucide-react";
+import {$getSelection, $isRangeSelection, $setBlocksType} from 'lexical';
 
 import LexicalTheme from '@/LexicalTheme';
 import {parseAllowedColor, parseAllowedFontSize} from '@/lexicalStyleConfig';
@@ -30,7 +37,7 @@ const Toolbar = () => {
     });
   };
 
-  const formatText = (format: string) => {
+  const formatText = (format: 'bold' | 'italic' | 'underline') => {
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
@@ -91,25 +98,7 @@ const placeholder = 'Enter the description...';
 
 const editorConfig = {
   namespace: 'Product Description Editor',
-  theme: {
-    paragraph: 'mb-1',
-    heading: {
-      h1: 'text-2xl font-bold mb-2',
-      h2: 'text-xl font-bold mb-2',
-      h3: 'text-lg font-bold mb-2',
-    },
-    text: {
-      bold: 'font-bold',
-      italic: 'italic',
-      underline: 'underline',
-    },
-    list: {
-      ul: 'list-disc ml-4 mb-2',
-      ol: 'list-decimal ml-4 mb-2',
-      listitem: 'mb-1',
-    },
-    quote: 'border-l-4 border-gray-200 pl-4 mb-2',
-  },
+  theme: LexicalTheme,
   nodes: [
     HeadingNode,
     QuoteNode,
@@ -154,16 +143,6 @@ export function MyLexicalEditor() {
 }
 
 import {
-  $createHeadingNode,
-  $createQuoteNode,
-  $isRangeSelection,
-  $getSelection,
-  $setBlocksType,
-} from 'lexical';
-import {
   INSERT_UNORDERED_LIST_COMMAND,
   INSERT_ORDERED_LIST_COMMAND,
 } from '@lexical/list';
-import {
-  FORMAT_QUOTE_COMMAND,
-} from '@lexical/rich-text';
