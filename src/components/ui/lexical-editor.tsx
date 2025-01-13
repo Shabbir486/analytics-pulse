@@ -21,7 +21,7 @@ import {Button} from "./button";
 import {Bold, Italic, Underline, Link, List, Quote, Heading1} from "lucide-react";
 import {$getSelection, $isRangeSelection} from 'lexical';
 import {$setBlocksType} from '@lexical/selection';
-import {FORMAT_ELEMENT_COMMAND} from '@lexical/commands';
+import {INSERT_UNORDERED_LIST_COMMAND} from '@lexical/list';
 
 import LexicalTheme from '@/LexicalTheme';
 import {parseAllowedColor, parseAllowedFontSize} from '@/lexicalStyleConfig';
@@ -87,7 +87,7 @@ const Toolbar = () => {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'quote')}
+        onClick={() => editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)}
       >
         <Quote className="h-4 w-4" />
       </Button>
@@ -142,8 +142,3 @@ export function MyLexicalEditor() {
     </LexicalComposer>
   );
 }
-
-import {
-  INSERT_UNORDERED_LIST_COMMAND,
-  INSERT_ORDERED_LIST_COMMAND,
-} from '@lexical/list';
