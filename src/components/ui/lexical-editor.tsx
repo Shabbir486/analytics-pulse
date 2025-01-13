@@ -12,33 +12,54 @@ import {
 } from '@lexical/rich-text';
 import {ListPlugin} from '@lexical/react/LexicalListPlugin';
 import {ListNode, ListItemNode} from '@lexical/list';
-import {LinkNode} from '@lexical/link';
+import {LinkNode, TOGGLE_LINK_COMMAND} from '@lexical/link';
 import {MarkdownShortcutPlugin} from '@lexical/react/LexicalMarkdownShortcutPlugin';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {HorizontalRuleNode} from '@lexical/react/LexicalHorizontalRuleNode';
 import {CodeNode} from '@lexical/code';
 import {Button} from "./button";
-import {Bold, Italic, Underline, Link, List, Quote, Heading1} from "lucide-react";
+import {
+  Bold, 
+  Italic, 
+  Underline, 
+  Strikethrough,
+  List as ListIcon, 
+  ListOrdered,
+  Quote as QuoteIcon,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  Maximize2
+} from "lucide-react";
 import {$getSelection, $isRangeSelection} from 'lexical';
 import {$setBlocksType} from '@lexical/selection';
-import {INSERT_UNORDERED_LIST_COMMAND} from '@lexical/list';
+import {INSERT_UNORDERED_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND} from '@lexical/list';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import LexicalTheme from '@/LexicalTheme';
-import {parseAllowedColor, parseAllowedFontSize} from '@/lexicalStyleConfig';
 
 const Toolbar = () => {
   const [editor] = useLexicalComposerContext();
 
-  const formatHeading = () => {
+  const formatHeading = (type: string) => {
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
-        $setBlocksType(selection, () => $createHeadingNode("h1"));
+        $setBlocksType(selection, () => $createHeadingNode(type as "h1" | "h2" | "h3" | "h4" | "h5"));
       }
     });
   };
 
-  const formatText = (format: 'bold' | 'italic' | 'underline') => {
+  const formatText = (format: string) => {
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
@@ -47,55 +68,143 @@ const Toolbar = () => {
     });
   };
 
+  const formatAlignment = (alignment: 'left' | 'center' | 'right' | 'justify') => {
+    editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, alignment);
+  };
+
   return (
-    <div className="flex gap-2 p-2 border-b">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => formatText('bold')}
-      >
-        <Bold className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => formatText('italic')}
-      >
-        <Italic className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => formatText('underline')}
-      >
-        <Underline className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={formatHeading}
-      >
-        <Heading1 className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)}
-      >
-        <List className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)}
-      >
-        <Quote className="h-4 w-4" />
-      </Button>
+    <div className="flex items-center gap-1 p-2 border-b bg-background">
+      <Select onValueChange={formatHeading}>
+        <SelectTrigger className="w-[130px] h-8">
+          <SelectValue placeholder="Paragraph" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="paragraph">Paragraph</SelectItem>
+          <SelectItem value="h1">Heading 1</SelectItem>
+          <SelectItem value="h2">Heading 2</SelectItem>
+          <SelectItem value="h3">Heading 3</SelectItem>
+          <SelectItem value="h4">Heading 4</SelectItem>
+          <SelectItem value="h5">Heading 5</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <div className="flex items-center border-l mx-1 pl-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => formatText('bold')}
+        >
+          <Bold className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => formatText('italic')}
+        >
+          <Italic className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => formatText('underline')}
+        >
+          <Underline className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => formatText('strikethrough')}
+        >
+          <Strikethrough className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="flex items-center border-l mx-1 pl-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)}
+        >
+          <ListIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)}
+        >
+          <ListOrdered className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.dispatchCommand(FORMAT_QUOTE_COMMAND, undefined)}
+        >
+          <QuoteIcon className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="flex items-center border-l mx-1 pl-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.dispatchCommand(TOGGLE_LINK_COMMAND, 'https://')}
+        >
+          <LinkIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {/* TODO: Implement image upload */}}
+        >
+          <ImageIcon className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="flex items-center border-l mx-1 pl-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => formatAlignment('left')}
+        >
+          <AlignLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => formatAlignment('center')}
+        >
+          <AlignCenter className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => formatAlignment('right')}
+        >
+          <AlignRight className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => formatAlignment('justify')}
+        >
+          <AlignJustify className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="flex items-center border-l mx-1 pl-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {/* TODO: Implement fullscreen */}}
+        >
+          <Maximize2 className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 };
 
-const placeholder = 'Enter the description...';
+const placeholder = 'Write something awesome...';
 
 const editorConfig = {
   namespace: 'Product Description Editor',
