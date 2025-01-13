@@ -9,7 +9,8 @@ import {
   QuoteNode,
   $createHeadingNode,
   $createQuoteNode,
-  FORMAT_QUOTE_COMMAND
+  $setBlocksType,
+  FORMAT_ELEMENT_COMMAND
 } from '@lexical/rich-text';
 import {ListPlugin} from '@lexical/react/LexicalListPlugin';
 import {ListNode, ListItemNode} from '@lexical/list';
@@ -20,7 +21,7 @@ import {HorizontalRuleNode} from '@lexical/react/LexicalHorizontalRuleNode';
 import {CodeNode} from '@lexical/code';
 import {Button} from "./button";
 import {Bold, Italic, Underline, Link, List, Quote, Heading1} from "lucide-react";
-import {$getSelection, $isRangeSelection, $setBlocksType} from 'lexical';
+import {$getSelection, $isRangeSelection} from 'lexical';
 
 import LexicalTheme from '@/LexicalTheme';
 import {parseAllowedColor, parseAllowedFontSize} from '@/lexicalStyleConfig';
@@ -86,7 +87,7 @@ const Toolbar = () => {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => editor.dispatchCommand(FORMAT_QUOTE_COMMAND, undefined)}
+        onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'quote')}
       >
         <Quote className="h-4 w-4" />
       </Button>
