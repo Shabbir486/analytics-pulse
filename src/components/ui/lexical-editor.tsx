@@ -10,12 +10,16 @@ import {
 } from '@lexical/rich-text';
 import {ListPlugin} from '@lexical/react/LexicalListPlugin';
 import {ListNode, ListItemNode} from '@lexical/list';
-import {LinkNode} from '@lexical/link';
+import {LinkNode, TOGGLE_LINK_COMMAND} from '@lexical/link';
 import {MarkdownShortcutPlugin} from '@lexical/react/LexicalMarkdownShortcutPlugin';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {HorizontalRuleNode} from '@lexical/react/LexicalHorizontalRuleNode';
 import {CodeNode} from '@lexical/code';
 import {OnChangePlugin} from '@lexical/react/LexicalOnChangePlugin';
+import {
+  INSERT_ORDERED_LIST_COMMAND,
+  INSERT_UNORDERED_LIST_COMMAND,
+} from '@lexical/list';
 import {Button} from "./button";
 import {
   Bold, 
@@ -208,7 +212,7 @@ const editorConfig = {
 export function MyLexicalEditor({ onChange, initialValue, className }: EditorProps) {
   const initialConfig = {
     ...editorConfig,
-    editorState: initialValue,
+    editorState: initialValue ? JSON.stringify(initialValue) : null,
   };
 
   return (
