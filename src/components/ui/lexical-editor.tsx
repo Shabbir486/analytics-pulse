@@ -34,7 +34,7 @@ import {
   AlignJustify,
   Maximize2
 } from "lucide-react";
-import {$getSelection, $isRangeSelection, TextFormatType, EditorState} from 'lexical';
+import {$getSelection, $isRangeSelection, TextFormatType, EditorState, $getRoot, $createParagraphNode} from 'lexical';
 import {$setBlocksType} from '@lexical/selection';
 import {FORMAT_TEXT_COMMAND, FORMAT_ELEMENT_COMMAND} from 'lexical';
 import {
@@ -60,8 +60,15 @@ const Toolbar = () => {
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
+        if (type === 'paragraph') {
+          // Convert to paragraph node
+          const root = $getRoot();
+          root.clear();
+          root.append($createParagraphNode());
+        } else {
           $setBlocksType(selection, () => $createHeadingNode(type as "h1" | "h2" | "h3" | "h4" | "h5"));
         }
+      }
     });
   };
 
