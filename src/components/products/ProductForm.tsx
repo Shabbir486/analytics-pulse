@@ -32,7 +32,6 @@ export function ProductForm({ initialData }: ProductFormProps) {
       taxIncluded: false
     }
   });
-
   useEffect(() => {
     if (initialData) {
       reset({
@@ -101,8 +100,9 @@ export function ProductForm({ initialData }: ProductFormProps) {
           <Label htmlFor="description">Description</Label>
           <MyLexicalEditor
             onChange={handleEditorChange}
-            initialValue={watch("description")}
+            initialValue={watch('description')}
             className="bg-background"
+            placeholder="Enter the description"
           />
         </div>
 

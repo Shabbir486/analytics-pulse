@@ -1,33 +1,29 @@
-import {AutoFocusPlugin} from '@lexical/react/LexicalAutoFocusPlugin';
-import {LexicalComposer} from '@lexical/react/LexicalComposer';
-import {ContentEditable} from '@lexical/react/LexicalContentEditable';
-import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
-import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
-import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
-import {
-  HeadingNode, 
-  HeadingTagType, 
-  QuoteNode,
-} from '@lexical/rich-text';
-import {ListPlugin} from '@lexical/react/LexicalListPlugin';
-import {ListNode, ListItemNode} from '@lexical/list';
-import {LinkNode, TOGGLE_LINK_COMMAND} from '@lexical/link';
-import {MarkdownShortcutPlugin} from '@lexical/react/LexicalMarkdownShortcutPlugin';
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {HorizontalRuleNode} from '@lexical/react/LexicalHorizontalRuleNode';
-import {CodeNode} from '@lexical/code';
-import {OnChangePlugin} from '@lexical/react/LexicalOnChangePlugin';
+import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { HeadingNode, HeadingTagType, QuoteNode } from "@lexical/rich-text";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { ListNode, ListItemNode } from "@lexical/list";
+import { LinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
+import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
+import { CodeNode } from "@lexical/code";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import {
   INSERT_ORDERED_LIST_COMMAND,
   INSERT_UNORDERED_LIST_COMMAND,
-} from '@lexical/list';
-import {Button} from "./button";
+} from "@lexical/list";
+import { Button } from "./button";
 import {
-  Bold, 
-  Italic, 
-  Underline, 
+  Bold,
+  Italic,
+  Underline,
   Strikethrough,
-  List as ListIcon, 
+  List as ListIcon,
   ListOrdered,
   Quote as QuoteIcon,
   Link as LinkIcon,
@@ -36,18 +32,26 @@ import {
   AlignCenter,
   AlignRight,
   AlignJustify,
-  Maximize2
+  Maximize2,
+  Redo,
+  Undo,
 } from "lucide-react";
 import {
   $createParagraphNode,
   $getSelection,
   $isRangeSelection,
   $isTextNode,
+  CAN_REDO_COMMAND,
+  CAN_UNDO_COMMAND,
   EditorState,
   LexicalEditor,
+  REDO_COMMAND,
+  SELECTION_CHANGE_COMMAND,
   TextFormatType,
-} from 'lexical';import {FORMAT_TEXT_COMMAND, FORMAT_ELEMENT_COMMAND} from 'lexical';
-import {$setBlocksType} from '@lexical/selection';
+  UNDO_COMMAND,
+} from "lexical";
+import { FORMAT_TEXT_COMMAND, FORMAT_ELEMENT_COMMAND } from "lexical";
+import { $setBlocksType } from "@lexical/selection";
 import {
   Select,
   SelectContent,
@@ -55,51 +59,145 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { $createHeadingNode } from '@lexical/rich-text';
+import { $createHeadingNode } from "@lexical/rich-text";
 
-import LexicalTheme from '@/LexicalTheme';
-import { formatHeading, formatParagraph } from '@/utils/lexical-utils';
-import { ToolbarContext, useToolbarState } from '@/context/toolbarContext';
+import LexicalTheme from "@/LexicalTheme";
+import { formatHeading, formatParagraph } from "@/utils/lexical-utils";
+import { ToolbarContext, useToolbarState } from "@/context/toolbarContext";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface EditorProps {
   onChange?: (editorState: EditorState) => void;
   initialValue?: string;
   className?: string;
+  placeholder:string;
 }
 
 const Toolbar = () => {
   const [editor] = useLexicalComposerContext();
+  const toolbarRef = useRef(null);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+  const [isBold, setIsBold] = useState(false);
+  const [isItalic, setIsItalic] = useState(false);
+  const [isUnderline, setIsUnderline] = useState(false);
+  const [isStrikethrough, setIsStrikethrough] = useState(false);
+
+  const $updateToolbar = useCallback(() => {
+    const selection = $getSelection();
+    if ($isRangeSelection(selection)) {
+      // Update text format
+      setIsBold(selection.hasFormat('bold'));
+      setIsItalic(selection.hasFormat('italic'));
+      setIsUnderline(selection.hasFormat('underline'));
+      setIsStrikethrough(selection.hasFormat('strikethrough'));
+    }
+  }, []);
+  type Func = () => void;
+  function mergeRegister(...func: Array<Func>): () => void {
+    return () => {
+      for (let i = func.length - 1; i >= 0; i--) {
+        func[i]();
+      }
+      // Clean up the references and make future calls a no-op
+      func.length = 0;
+    };
+  }
+  const LowPriority = 1;
+  useEffect(() => {
+    return mergeRegister(
+      editor.registerUpdateListener(({editorState}) => {
+        editorState.read(() => {
+          $updateToolbar();
+        });
+      }),
+      editor.registerCommand(
+        SELECTION_CHANGE_COMMAND,
+        (_payload, _newEditor) => {
+          $updateToolbar();
+          return false;
+        },
+        LowPriority,
+      ),
+      editor.registerCommand(
+        CAN_UNDO_COMMAND,
+        (payload) => {
+          setCanUndo(payload);
+          return false;
+        },
+        LowPriority,
+      ),
+      editor.registerCommand(
+        CAN_REDO_COMMAND,
+        (payload) => {
+          setCanRedo(payload);
+          return false;
+        },
+        LowPriority,
+      ),
+    );
+  }, [editor, $updateToolbar]);
 
   const handleFormatHeading = (type: string) => {
+    console.log(type);
+    
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
-        if (type === 'paragraph') {
+        if (type === "paragraph") {
           formatParagraph(editor);
         } else {
-          formatHeading(editor, type, type as HeadingTagType)
+          formatHeading(editor,type as HeadingTagType);
         }
       }
-    })
+    });
   };
 
   const formatText = (format: TextFormatType) => {
     editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
   };
 
-  const formatAlignment = (alignment: 'left' | 'center' | 'right' | 'justify') => {
+  const formatAlignment = (
+    alignment: "left" | "center" | "right" | "justify"
+  ) => {
     editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, alignment);
   };
 
   return (
-    <div className="flex items-center gap-1 p-2 border-b bg-background">
+    <div className="flex items-center gap-1 p-2 border-b bg-background" ref={toolbarRef}>
+      <Button
+        variant="ghost"
+        disabled={!canUndo}
+        size="sm"
+        onClick={() => {
+          editor.dispatchCommand(UNDO_COMMAND, undefined);
+        }}
+        aria-label="Bold text"
+      >
+        <Undo className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        disabled={!canRedo}
+        size="sm"
+        onClick={() => {
+          editor.dispatchCommand(REDO_COMMAND, undefined);
+        }}
+        aria-label="Bold text"
+      >
+        <Redo className="h-4 w-4" />
+      </Button>
       <Select onValueChange={handleFormatHeading}>
-        <SelectTrigger className="w-[130px] h-8" aria-label="Text formatting options">
+        <SelectTrigger
+          className="w-[130px] h-8"
+          aria-label="Text formatting options"
+        >
           <SelectValue placeholder="Paragraph" />
         </SelectTrigger>
         <SelectContent aria-describedby="format-description">
           <div id="format-description" className="sr-only">
-            Choose text formatting style from paragraph or different heading levels
+            Choose text formatting style from paragraph or different heading
+            levels
           </div>
           <SelectItem value="paragraph">Paragraph</SelectItem>
           <SelectItem value="h1">Heading 1</SelectItem>
@@ -111,31 +209,23 @@ const Toolbar = () => {
       </Select>
 
       <Button
-        variant="ghost"
+        variant={isBold ? "secondary" : "ghost"}
         size="sm"
-        onClick={() => formatText('bold')}
+        onClick={() => formatText("bold")}
         aria-label="Bold text"
       >
         <Bold className="h-4 w-4" />
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => formatText('italic')}
-      >
+      <Button variant={isItalic ? "secondary" : "ghost"} size="sm" onClick={() => formatText("italic")}>
         <Italic className="h-4 w-4" />
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => formatText('underline')}
-      >
+      <Button variant={isUnderline ? "secondary" : "ghost"} size="sm" onClick={() => formatText("underline")}>
         <Underline className="h-4 w-4" />
       </Button>
       <Button
-        variant="ghost"
+        variant={isStrikethrough ? "secondary" : "ghost"}
         size="sm"
-        onClick={() => formatText('strikethrough')}
+        onClick={() => formatText("strikethrough")}
       >
         <Strikethrough className="h-4 w-4" />
       </Button>
@@ -143,7 +233,9 @@ const Toolbar = () => {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)}
+        onClick={() =>
+          editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
+        }
         aria-label="Insert unordered list"
       >
         <ListIcon className="h-4 w-4" />
@@ -151,7 +243,9 @@ const Toolbar = () => {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)}
+        onClick={() =>
+          editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
+        }
         aria-label="Insert ordered list"
       >
         <ListOrdered className="h-4 w-4" />
@@ -160,63 +254,49 @@ const Toolbar = () => {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => editor.dispatchCommand(TOGGLE_LINK_COMMAND, 'https://')}
+        onClick={() => editor.dispatchCommand(TOGGLE_LINK_COMMAND, "https://")}
         aria-label="Insert link"
       >
         <LinkIcon className="h-4 w-4" />
       </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => {}}
-      >
+      <Button variant="ghost" size="sm" onClick={() => {}}>
         <ImageIcon className="h-4 w-4" />
       </Button>
 
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => formatAlignment('left')}
-      >
+      <Button variant="ghost" size="sm" onClick={() => formatAlignment("left")}>
         <AlignLeft className="h-4 w-4" />
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => formatAlignment('center')}
+        onClick={() => formatAlignment("center")}
       >
         <AlignCenter className="h-4 w-4" />
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => formatAlignment('right')}
+        onClick={() => formatAlignment("right")}
       >
         <AlignRight className="h-4 w-4" />
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => formatAlignment('justify')}
+        onClick={() => formatAlignment("justify")}
       >
         <AlignJustify className="h-4 w-4" />
       </Button>
 
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => {}}
-      >
+      <Button variant="ghost" size="sm" onClick={() => {}}>
         <Maximize2 className="h-4 w-4" />
       </Button>
     </div>
   );
 };
 
-const placeholder = 'Write something awesome...';
-
 const editorConfig = {
-  namespace: 'Product Description Editor',
+  namespace: "Product Description Editor",
   theme: LexicalTheme,
   nodes: [
     HeadingNode,
@@ -225,25 +305,31 @@ const editorConfig = {
     ListItemNode,
     LinkNode,
     HorizontalRuleNode,
-    CodeNode
+    CodeNode,
   ],
   onError(error: Error) {
     console.error(error);
   },
 };
 
-export function MyLexicalEditor({ onChange, initialValue, className }: EditorProps) {
+export function MyLexicalEditor({
+  onChange,
+  initialValue,
+  className,
+  placeholder
+}: EditorProps) {
   const initialConfig = {
     ...editorConfig,
-    editorState: useToolbarState
+    editorState: null,
   };
 
   return (
-    <ToolbarContext>
     <LexicalComposer initialConfig={initialConfig}>
       <div className={`border rounded-md ${className}`}>
-        <Toolbar />
-        <div className="p-2">
+        <ToolbarContext>
+          <Toolbar />
+        </ToolbarContext>
+        <div className="p-2 relative">
           <RichTextPlugin
             contentEditable={
               <ContentEditable
@@ -252,7 +338,7 @@ export function MyLexicalEditor({ onChange, initialValue, className }: EditorPro
               />
             }
             placeholder={
-              <div className="absolute top-[60px] left-[10px] text-gray-400 pointer-events-none">
+              <div className="absolute top-2 left-2 text-gray-400 pointer-events-none">
                 {placeholder}
               </div>
             }
@@ -272,6 +358,5 @@ export function MyLexicalEditor({ onChange, initialValue, className }: EditorPro
         </div>
       </div>
     </LexicalComposer>
-    </ToolbarContext>
   );
 }
