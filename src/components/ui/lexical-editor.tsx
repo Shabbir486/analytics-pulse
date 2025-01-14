@@ -8,7 +8,6 @@ import {
   HeadingNode, 
   QuoteNode,
   $createHeadingNode,
-  $createQuoteNode
 } from '@lexical/rich-text';
 import {ListPlugin} from '@lexical/react/LexicalListPlugin';
 import {ListNode, ListItemNode, INSERT_UNORDERED_LIST_COMMAND, INSERT_ORDERED_LIST_COMMAND} from '@lexical/list';
@@ -61,12 +60,8 @@ const Toolbar = () => {
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
-        if (type === 'paragraph') {
-          editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'paragraph');
-        } else {
           $setBlocksType(selection, () => $createHeadingNode(type as "h1" | "h2" | "h3" | "h4" | "h5"));
         }
-      }
     });
   };
 

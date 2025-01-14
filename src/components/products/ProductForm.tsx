@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { MyLexicalEditor } from "@/components/ui/lexical-editor";
+import { EditorState } from "lexical";
 
 interface ProductFormProps {
   initialData?: Product | null;
@@ -78,7 +79,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
     input.click();
   };
 
-  const handleEditorChange = (editorState: any) => {
+  const handleEditorChange = (editorState: EditorState) => {
     editorState.read(() => {
       const jsonString = JSON.stringify(editorState.toJSON());
       setValue("description", jsonString);
