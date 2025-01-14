@@ -20,9 +20,7 @@ import {
   $getSelection,
   $isRangeSelection,
   $isTextNode,
-  DOMConversionMap,
   LexicalEditor,
-  TextNode,
 } from 'lexical';
 
 import {
@@ -161,12 +159,15 @@ export const formatParagraph = (editor: LexicalEditor) => {
 
 export const formatHeading = (
   editor: LexicalEditor,
+  blockType: string,
   headingSize: HeadingTagType,
 ) => {
+  if (blockType !== headingSize) {
     editor.update(() => {
       const selection = $getSelection();
       $setBlocksType(selection, () => $createHeadingNode(headingSize));
     });
+  }
 };
 
 export const formatBulletList = (editor: LexicalEditor, blockType: string) => {

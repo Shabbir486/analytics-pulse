@@ -4,9 +4,9 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { HeadingNode, HeadingTagType, QuoteNode } from "@lexical/rich-text";
+import { $isHeadingNode, HeadingNode, HeadingTagType, QuoteNode } from "@lexical/rich-text";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
-import { ListNode, ListItemNode } from "@lexical/list";
+import { ListNode, ListItemNode, $isListNode } from "@lexical/list";
 import { LinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
@@ -37,21 +37,18 @@ import {
   Undo,
 } from "lucide-react";
 import {
-  $createParagraphNode,
   $getSelection,
   $isRangeSelection,
-  $isTextNode,
+  $isRootOrShadowRoot,
   CAN_REDO_COMMAND,
   CAN_UNDO_COMMAND,
   EditorState,
-  LexicalEditor,
   REDO_COMMAND,
   SELECTION_CHANGE_COMMAND,
   TextFormatType,
   UNDO_COMMAND,
 } from "lexical";
 import { FORMAT_TEXT_COMMAND, FORMAT_ELEMENT_COMMAND } from "lexical";
-import { $setBlocksType } from "@lexical/selection";
 import {
   Select,
   SelectContent,
@@ -59,38 +56,80 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { $createHeadingNode } from "@lexical/rich-text";
 
 import LexicalTheme from "@/LexicalTheme";
 import { formatHeading, formatParagraph } from "@/utils/lexical-utils";
-import { ToolbarContext, useToolbarState } from "@/context/toolbarContext";
+import {
+  blockTypeToBlockName,
+  ToolbarContext,
+  useToolbarState,
+} from "@/context/toolbarContext";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { $findMatchingParent, $getNearestNodeOfType } from "@lexical/utils";
 
 interface EditorProps {
   onChange?: (editorState: EditorState) => void;
   initialValue?: string;
   className?: string;
-  placeholder:string;
+  placeholder: string;
 }
 
 const Toolbar = () => {
   const [editor] = useLexicalComposerContext();
   const toolbarRef = useRef(null);
+  const { toolbarState, updateToolbarState } = useToolbarState();
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
   const [isStrikethrough, setIsStrikethrough] = useState(false);
-
   const $updateToolbar = useCallback(() => {
     const selection = $getSelection();
     if ($isRangeSelection(selection)) {
       // Update text format
-      setIsBold(selection.hasFormat('bold'));
-      setIsItalic(selection.hasFormat('italic'));
-      setIsUnderline(selection.hasFormat('underline'));
-      setIsStrikethrough(selection.hasFormat('strikethrough'));
+      setIsBold(selection.hasFormat("bold"));
+      setIsItalic(selection.hasFormat("italic"));
+      setIsUnderline(selection.hasFormat("underline"));
+      setIsStrikethrough(selection.hasFormat("strikethrough"));
+
+      //Updating state for the dropdown
+      const anchorNode = selection.anchor.getNode();
+      let element =
+        anchorNode.getKey() === "root"
+          ? anchorNode
+          : $findMatchingParent(anchorNode, (e) => {
+              const parent = e.getParent();
+              return parent !== null && $isRootOrShadowRoot(parent);
+            });
+      if (element === null) {
+        element = anchorNode.getTopLevelElementOrThrow();
+      }
+      const elementKey = element.getKey();
+      const elementDOM = editor.getElementByKey(elementKey);
+      if (elementDOM !== null) {
+        //for list node update
+        // if ($isListNode(element)) {
+        //   const parentList = $getNearestNodeOfType<ListNode>(
+        //     anchorNode,
+        //     ListNode,
+        //   );
+        //   const type = parentList
+        //     ? parentList.getListType()
+        //     : element.getListType();
+
+        //   updateToolbarState('blockType', type);
+        // } else {
+          const type = $isHeadingNode(element)
+            ? element.getTag()
+            : element.getType();
+          if (type in blockTypeToBlockName) {
+            updateToolbarState(
+              'blockType',
+              type as keyof typeof blockTypeToBlockName,
+            );
+          }
+        }
     }
   }, []);
   type Func = () => void;
@@ -106,7 +145,7 @@ const Toolbar = () => {
   const LowPriority = 1;
   useEffect(() => {
     return mergeRegister(
-      editor.registerUpdateListener(({editorState}) => {
+      editor.registerUpdateListener(({ editorState }) => {
         editorState.read(() => {
           $updateToolbar();
         });
@@ -117,7 +156,7 @@ const Toolbar = () => {
           $updateToolbar();
           return false;
         },
-        LowPriority,
+        LowPriority
       ),
       editor.registerCommand(
         CAN_UNDO_COMMAND,
@@ -125,7 +164,7 @@ const Toolbar = () => {
           setCanUndo(payload);
           return false;
         },
-        LowPriority,
+        LowPriority
       ),
       editor.registerCommand(
         CAN_REDO_COMMAND,
@@ -133,24 +172,17 @@ const Toolbar = () => {
           setCanRedo(payload);
           return false;
         },
-        LowPriority,
-      ),
+        LowPriority
+      )
     );
   }, [editor, $updateToolbar]);
 
   const handleFormatHeading = (type: string) => {
-    console.log(type);
-    
-    editor.update(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        if (type === "paragraph") {
-          formatParagraph(editor);
-        } else {
-          formatHeading(editor,type as HeadingTagType);
-        }
-      }
-    });
+    if (type === "paragraph") {
+      formatParagraph(editor);
+    } else {
+      formatHeading(editor, toolbarState.blockType, type as HeadingTagType);
+    }
   };
 
   const formatText = (format: TextFormatType) => {
@@ -164,7 +196,10 @@ const Toolbar = () => {
   };
 
   return (
-    <div className="flex items-center gap-1 p-2 border-b bg-background" ref={toolbarRef}>
+    <div
+      className="flex items-center gap-1 p-2 border-b bg-background"
+      ref={toolbarRef}
+    >
       <Button
         variant="ghost"
         disabled={!canUndo}
@@ -192,14 +227,13 @@ const Toolbar = () => {
           className="w-[130px] h-8"
           aria-label="Text formatting options"
         >
-          <SelectValue placeholder="Paragraph" />
+          {toolbarState.blockType ? 
+            (<span className="text-sm">{blockTypeToBlockName[toolbarState.blockType]}</span>)
+            :
+            (<SelectValue placeholder="Paragraph"/>)}
         </SelectTrigger>
         <SelectContent aria-describedby="format-description">
-          <div id="format-description" className="sr-only">
-            Choose text formatting style from paragraph or different heading
-            levels
-          </div>
-          <SelectItem value="paragraph">Paragraph</SelectItem>
+          <SelectItem value="paragraph">Normal</SelectItem>
           <SelectItem value="h1">Heading 1</SelectItem>
           <SelectItem value="h2">Heading 2</SelectItem>
           <SelectItem value="h3">Heading 3</SelectItem>
@@ -216,10 +250,18 @@ const Toolbar = () => {
       >
         <Bold className="h-4 w-4" />
       </Button>
-      <Button variant={isItalic ? "secondary" : "ghost"} size="sm" onClick={() => formatText("italic")}>
+      <Button
+        variant={isItalic ? "secondary" : "ghost"}
+        size="sm"
+        onClick={() => formatText("italic")}
+      >
         <Italic className="h-4 w-4" />
       </Button>
-      <Button variant={isUnderline ? "secondary" : "ghost"} size="sm" onClick={() => formatText("underline")}>
+      <Button
+        variant={isUnderline ? "secondary" : "ghost"}
+        size="sm"
+        onClick={() => formatText("underline")}
+      >
         <Underline className="h-4 w-4" />
       </Button>
       <Button
@@ -316,7 +358,7 @@ export function MyLexicalEditor({
   onChange,
   initialValue,
   className,
-  placeholder
+  placeholder,
 }: EditorProps) {
   const initialConfig = {
     ...editorConfig,
