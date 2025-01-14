@@ -4,10 +4,15 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { $isHeadingNode, HeadingNode, HeadingTagType, QuoteNode } from "@lexical/rich-text";
+import {
+  $isHeadingNode,
+  HeadingNode,
+  HeadingTagType,
+  QuoteNode,
+} from "@lexical/rich-text";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { ListNode, ListItemNode, $isListNode } from "@lexical/list";
-import { LinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
+import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
@@ -58,7 +63,7 @@ import {
 } from "@/components/ui/select";
 
 import LexicalTheme from "@/LexicalTheme";
-import { formatHeading, formatParagraph } from "@/utils/lexical-utils";
+import { formatHeading, formatParagraph, getSelectedNode, sanitizeUrl } from "@/utils/lexical-utils";
 import {
   blockTypeToBlockName,
   ToolbarContext,
@@ -74,7 +79,9 @@ interface EditorProps {
   placeholder: string;
 }
 
-const Toolbar = () => {
+const Toolbar = ({
+  setIsLinkEditMode
+}) => {
   const [editor] = useLexicalComposerContext();
   const toolbarRef = useRef(null);
   const { toolbarState, updateToolbarState } = useToolbarState();
@@ -120,16 +127,23 @@ const Toolbar = () => {
 
         //   updateToolbarState('blockType', type);
         // } else {
-          const type = $isHeadingNode(element)
-            ? element.getTag()
-            : element.getType();
-          if (type in blockTypeToBlockName) {
-            updateToolbarState(
-              'blockType',
-              type as keyof typeof blockTypeToBlockName,
-            );
-          }
+        const type = $isHeadingNode(element)
+          ? element.getTag()
+          : element.getType();
+        if (type in blockTypeToBlockName) {
+          updateToolbarState(
+            "blockType",
+            type as keyof typeof blockTypeToBlockName
+          );
         }
+      }
+      // }
+
+      // Update links
+      const node = getSelectedNode(selection);
+      const parent = node.getParent();
+      const isLink = $isLinkNode(parent) || $isLinkNode(node);
+      updateToolbarState('isLink', isLink);
     }
   }, []);
   type Func = () => void;
@@ -176,6 +190,19 @@ const Toolbar = () => {
       )
     );
   }, [editor, $updateToolbar]);
+
+  const insertLink = useCallback(() => {
+    if (!toolbarState.isLink) {
+      setIsLinkEditMode(true);
+      editor.dispatchCommand(
+        TOGGLE_LINK_COMMAND,
+        sanitizeUrl('https://'),
+      );
+    } else {
+      setIsLinkEditMode(false);
+      editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+    }
+  }, [editor, setIsLinkEditMode, toolbarState.isLink]);
 
   const handleFormatHeading = (type: string) => {
     if (type === "paragraph") {
@@ -227,10 +254,13 @@ const Toolbar = () => {
           className="w-[130px] h-8"
           aria-label="Text formatting options"
         >
-          {toolbarState.blockType ? 
-            (<span className="text-sm">{blockTypeToBlockName[toolbarState.blockType]}</span>)
-            :
-            (<SelectValue placeholder="Paragraph"/>)}
+          {toolbarState.blockType ? (
+            <span className="text-sm">
+              {blockTypeToBlockName[toolbarState.blockType]}
+            </span>
+          ) : (
+            <SelectValue placeholder="Paragraph" />
+          )}
         </SelectTrigger>
         <SelectContent aria-describedby="format-description">
           <SelectItem value="paragraph">Normal</SelectItem>
@@ -296,7 +326,7 @@ const Toolbar = () => {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => editor.dispatchCommand(TOGGLE_LINK_COMMAND, "https://")}
+        onClick={insertLink}
         aria-label="Insert link"
       >
         <LinkIcon className="h-4 w-4" />
@@ -360,6 +390,7 @@ export function MyLexicalEditor({
   className,
   placeholder,
 }: EditorProps) {
+  const [isLinkEditMode, setIsLinkEditMode] = useState<boolean>(false);
   const initialConfig = {
     ...editorConfig,
     editorState: null,
@@ -369,7 +400,7 @@ export function MyLexicalEditor({
     <LexicalComposer initialConfig={initialConfig}>
       <div className={`border rounded-md ${className}`}>
         <ToolbarContext>
-          <Toolbar />
+          <Toolbar setIsLinkEditMode={setIsLinkEditMode}/>
         </ToolbarContext>
         <div className="p-2 relative">
           <RichTextPlugin
