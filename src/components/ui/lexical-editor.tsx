@@ -36,7 +36,7 @@ import {
 } from "lucide-react";
 import {$getSelection, $isRangeSelection, TextFormatType} from 'lexical';
 import {$setBlocksType} from '@lexical/selection';
-import {FORMAT_ELEMENT_COMMAND, INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND} from '@lexical/commands';
+import {FORMAT_ELEMENT_COMMAND} from 'lexical';
 import {
   Select,
   SelectContent,
@@ -133,13 +133,6 @@ const Toolbar = () => {
           onClick={() => editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)}
         >
           <ListOrdered className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.dispatchCommand(FORMAT_QUOTE_COMMAND, undefined)}
-        >
-          <QuoteIcon className="h-4 w-4" />
         </Button>
       </div>
 
