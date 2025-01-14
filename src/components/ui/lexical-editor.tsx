@@ -78,10 +78,13 @@ const Toolbar = () => {
   return (
     <div className="flex items-center gap-1 p-2 border-b bg-background">
       <Select onValueChange={handleFormatHeading}>
-        <SelectTrigger className="w-[130px] h-8">
+        <SelectTrigger className="w-[130px] h-8" aria-label="Text formatting options">
           <SelectValue placeholder="Paragraph" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent aria-describedby="format-description">
+          <div id="format-description" className="sr-only">
+            Choose text formatting style from paragraph or different heading levels
+          </div>
           <SelectItem value="paragraph">Paragraph</SelectItem>
           <SelectItem value="h1">Heading 1</SelectItem>
           <SelectItem value="h2">Heading 2</SelectItem>
@@ -95,6 +98,7 @@ const Toolbar = () => {
         variant="ghost"
         size="sm"
         onClick={() => formatText('bold')}
+        aria-label="Bold text"
       >
         <Bold className="h-4 w-4" />
       </Button>
@@ -124,6 +128,7 @@ const Toolbar = () => {
         variant="ghost"
         size="sm"
         onClick={() => editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)}
+        aria-label="Insert unordered list"
       >
         <ListIcon className="h-4 w-4" />
       </Button>
@@ -131,6 +136,7 @@ const Toolbar = () => {
         variant="ghost"
         size="sm"
         onClick={() => editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)}
+        aria-label="Insert ordered list"
       >
         <ListOrdered className="h-4 w-4" />
       </Button>
@@ -139,6 +145,7 @@ const Toolbar = () => {
         variant="ghost"
         size="sm"
         onClick={() => editor.dispatchCommand(TOGGLE_LINK_COMMAND, 'https://')}
+        aria-label="Insert link"
       >
         <LinkIcon className="h-4 w-4" />
       </Button>
@@ -224,6 +231,7 @@ export function MyLexicalEditor({ onChange, initialValue, className }: EditorPro
             contentEditable={
               <ContentEditable
                 className="min-h-[150px] outline-none"
+                aria-label="Rich text editor"
               />
             }
             placeholder={
