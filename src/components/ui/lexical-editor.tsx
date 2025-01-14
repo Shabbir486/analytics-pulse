@@ -62,7 +62,7 @@ const Toolbar = () => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
         if (type === 'paragraph') {
-          selection.formatText('paragraph');
+          editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'paragraph');
         } else {
           $setBlocksType(selection, () => $createHeadingNode(type as "h1" | "h2" | "h3" | "h4" | "h5"));
         }
@@ -153,7 +153,7 @@ const Toolbar = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => {/* TODO: Implement image upload */}}
+          onClick={() => {}}
         >
           <ImageIcon className="h-4 w-4" />
         </Button>
@@ -194,7 +194,7 @@ const Toolbar = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => {/* TODO: Implement fullscreen */}}
+          onClick={() => {}}
         >
           <Maximize2 className="h-4 w-4" />
         </Button>
@@ -250,7 +250,13 @@ export function MyLexicalEditor({ onChange, initialValue, className }: EditorPro
           <AutoFocusPlugin />
           <ListPlugin />
           <MarkdownShortcutPlugin />
-          {onChange && <OnChangePlugin onChange={onChange} />}
+          {onChange && (
+            <OnChangePlugin
+              onChange={onChange}
+              ignoreHistoryMergeTagChange={true}
+              ignoreSelectionChange={true}
+            />
+          )}
         </div>
       </div>
     </LexicalComposer>
