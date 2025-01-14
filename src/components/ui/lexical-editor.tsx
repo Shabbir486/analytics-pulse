@@ -6,6 +6,7 @@ import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
 import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
 import {
   HeadingNode, 
+  HeadingTagType, 
   QuoteNode,
 } from '@lexical/rich-text';
 import {ListPlugin} from '@lexical/react/LexicalListPlugin';
@@ -37,8 +38,16 @@ import {
   AlignJustify,
   Maximize2
 } from "lucide-react";
-import {$getSelection, $isRangeSelection, TextFormatType, EditorState, $createParagraphNode, $setBlocksType} from 'lexical';
-import {FORMAT_TEXT_COMMAND, FORMAT_ELEMENT_COMMAND} from 'lexical';
+import {
+  $createParagraphNode,
+  $getSelection,
+  $isRangeSelection,
+  $isTextNode,
+  EditorState,
+  LexicalEditor,
+  TextFormatType,
+} from 'lexical';import {FORMAT_TEXT_COMMAND, FORMAT_ELEMENT_COMMAND} from 'lexical';
+import {$setBlocksType} from '@lexical/selection';
 import {
   Select,
   SelectContent,
@@ -46,10 +55,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatHeading, formatParagraph } from '@/utils/sorting';
 import { $createHeadingNode } from '@lexical/rich-text';
 
 import LexicalTheme from '@/LexicalTheme';
+import { formatHeading, formatParagraph } from '@/utils/lexical-utils';
+import { ToolbarContext, useToolbarState } from '@/context/toolbarContext';
 
 interface EditorProps {
   onChange?: (editorState: EditorState) => void;
@@ -65,12 +75,12 @@ const Toolbar = () => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
         if (type === 'paragraph') {
-          $setBlocksType(selection, () => $createParagraphNode());
+          formatParagraph(editor);
         } else {
-          $setBlocksType(selection, () => $createHeadingNode(type as "h1" | "h2" | "h3" | "h4" | "h5"));
+          formatHeading(editor, type, type as HeadingTagType)
         }
       }
-    });
+    })
   };
 
   const formatText = (format: TextFormatType) => {
@@ -225,10 +235,11 @@ const editorConfig = {
 export function MyLexicalEditor({ onChange, initialValue, className }: EditorProps) {
   const initialConfig = {
     ...editorConfig,
-    editorState: initialValue,
+    editorState: useToolbarState
   };
 
   return (
+    <ToolbarContext>
     <LexicalComposer initialConfig={initialConfig}>
       <div className={`border rounded-md ${className}`}>
         <Toolbar />
@@ -261,5 +272,6 @@ export function MyLexicalEditor({ onChange, initialValue, className }: EditorPro
         </div>
       </div>
     </LexicalComposer>
+    </ToolbarContext>
   );
 }
