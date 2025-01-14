@@ -17,6 +17,7 @@ import {MarkdownShortcutPlugin} from '@lexical/react/LexicalMarkdownShortcutPlug
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {HorizontalRuleNode} from '@lexical/react/LexicalHorizontalRuleNode';
 import {CodeNode} from '@lexical/code';
+import {OnChangePlugin} from '@lexical/react/LexicalOnChangePlugin';
 import {Button} from "./button";
 import {
   Bold, 
@@ -34,9 +35,9 @@ import {
   AlignJustify,
   Maximize2
 } from "lucide-react";
-import {$getSelection, $isRangeSelection, TextFormatType} from 'lexical';
+import {$getSelection, $isRangeSelection, TextFormatType, EditorState} from 'lexical';
 import {$setBlocksType} from '@lexical/selection';
-import {FORMAT_ELEMENT_COMMAND} from 'lexical';
+import {FORMAT_TEXT_COMMAND, FORMAT_ELEMENT_COMMAND} from 'lexical';
 import {
   Select,
   SelectContent,
@@ -47,6 +48,12 @@ import {
 
 import LexicalTheme from '@/LexicalTheme';
 
+interface EditorProps {
+  onChange?: (editorState: EditorState) => void;
+  initialValue?: string;
+  className?: string;
+}
+
 const Toolbar = () => {
   const [editor] = useLexicalComposerContext();
 
@@ -54,18 +61,17 @@ const Toolbar = () => {
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
-        $setBlocksType(selection, () => $createHeadingNode(type as "h1" | "h2" | "h3" | "h4" | "h5"));
+        if (type === 'paragraph') {
+          selection.formatText('paragraph');
+        } else {
+          $setBlocksType(selection, () => $createHeadingNode(type as "h1" | "h2" | "h3" | "h4" | "h5"));
+        }
       }
     });
   };
 
   const formatText = (format: TextFormatType) => {
-    editor.update(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        selection.formatText(format);
-      }
-    });
+    editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
   };
 
   const formatAlignment = (alignment: 'left' | 'center' | 'right' | 'justify') => {
@@ -216,10 +222,15 @@ const editorConfig = {
   },
 };
 
-export function MyLexicalEditor() {
+export function MyLexicalEditor({ onChange, initialValue, className }: EditorProps) {
+  const initialConfig = {
+    ...editorConfig,
+    editorState: initialValue,
+  };
+
   return (
-    <LexicalComposer initialConfig={editorConfig}>
-      <div className="border rounded-md">
+    <LexicalComposer initialConfig={initialConfig}>
+      <div className={`border rounded-md ${className}`}>
         <Toolbar />
         <div className="p-2">
           <RichTextPlugin
@@ -239,6 +250,7 @@ export function MyLexicalEditor() {
           <AutoFocusPlugin />
           <ListPlugin />
           <MarkdownShortcutPlugin />
+          {onChange && <OnChangePlugin onChange={onChange} />}
         </div>
       </div>
     </LexicalComposer>

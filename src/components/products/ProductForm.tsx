@@ -78,6 +78,13 @@ export function ProductForm({ initialData }: ProductFormProps) {
     input.click();
   };
 
+  const handleEditorChange = (editorState: any) => {
+    editorState.read(() => {
+      const jsonString = JSON.stringify(editorState.toJSON());
+      setValue("description", jsonString);
+    });
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       <div className="space-y-4">
@@ -92,9 +99,9 @@ export function ProductForm({ initialData }: ProductFormProps) {
         <div className="space-y-2">
           <Label htmlFor="description">Description</Label>
           <MyLexicalEditor
-            // onChange={(value) => setValue("description", value)}
-            // initialValue={watch("description")}
-            // className="bg-background"
+            onChange={handleEditorChange}
+            initialValue={watch("description")}
+            className="bg-background"
           />
         </div>
 
