@@ -37,7 +37,7 @@ import {
   AlignJustify,
   Maximize2
 } from "lucide-react";
-import {$getSelection, $isRangeSelection, TextFormatType, EditorState} from 'lexical';
+import {$getSelection, $isRangeSelection, TextFormatType, EditorState, $createParagraphNode, $setBlocksType} from 'lexical';
 import {FORMAT_TEXT_COMMAND, FORMAT_ELEMENT_COMMAND} from 'lexical';
 import {
   Select,
@@ -47,6 +47,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatHeading, formatParagraph } from '@/utils/sorting';
+import { $createHeadingNode } from '@lexical/rich-text';
 
 import LexicalTheme from '@/LexicalTheme';
 
@@ -60,11 +61,16 @@ const Toolbar = () => {
   const [editor] = useLexicalComposerContext();
 
   const handleFormatHeading = (type: string) => {
-    if (type === 'paragraph') {
-      formatParagraph(editor);
-    } else {
-      formatHeading(editor, type, type as "h1" | "h2" | "h3" | "h4" | "h5");
-    }
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        if (type === 'paragraph') {
+          $setBlocksType(selection, () => $createParagraphNode());
+        } else {
+          $setBlocksType(selection, () => $createHeadingNode(type as "h1" | "h2" | "h3" | "h4" | "h5"));
+        }
+      }
+    });
   };
 
   const formatText = (format: TextFormatType) => {
@@ -219,7 +225,7 @@ const editorConfig = {
 export function MyLexicalEditor({ onChange, initialValue, className }: EditorProps) {
   const initialConfig = {
     ...editorConfig,
-    editorState: initialValue ? JSON.stringify(initialValue) : null,
+    editorState: initialValue,
   };
 
   return (
