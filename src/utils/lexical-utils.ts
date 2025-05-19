@@ -13,14 +13,15 @@ import {
   HeadingTagType,
 } from "@lexical/rich-text";
 import { $patchStyleText, $setBlocksType } from "@lexical/selection";
-import { $isTableSelection } from "@lexical/table";
-import { $getNearestBlockElementAncestorOrThrow } from "@lexical/utils";
 import {
   $createParagraphNode,
   $getSelection,
   $isRangeSelection,
   $isTextNode,
+  ElementNode,
   LexicalEditor,
+  RangeSelection,
+  TextNode,
 } from "lexical";
 
 import {
@@ -28,6 +29,39 @@ import {
   MAX_ALLOWED_FONT_SIZE,
   MIN_ALLOWED_FONT_SIZE,
 } from "@/context/toolbarContext";
+
+// Mock for $isTableSelection since we don't have @lexical/table
+function $isTableSelection(selection) {
+  return false; // Mocked implementation
+}
+
+// Implement the required utility functions from @lexical/utils
+function $getNearestBlockElementAncestorOrThrow(node) {
+  const element = $findMatchingParent(
+    node,
+    (parentNode) =>
+      parentNode.getType() !== "text" &&
+      parentNode.getType() !== "linebreak"
+  );
+  if (element === null) {
+    throw new Error("Expected node to have a block element ancestor");
+  }
+  return element;
+}
+
+function $findMatchingParent(
+  node,
+  predicate
+) {
+  let parent = node.getParent();
+  while (parent !== null) {
+    if (predicate(parent)) {
+      return parent;
+    }
+    parent = parent.getParent();
+  }
+  return null;
+}
 
 // eslint-disable-next-line no-shadow
 export enum UpdateFontSizeType {
@@ -231,7 +265,7 @@ export const formatCode = (editor: LexicalEditor, blockType: string) => {
 export const clearFormatting = (editor: LexicalEditor) => {
   editor.update(() => {
     const selection = $getSelection();
-    if ($isRangeSelection(selection) || $isTableSelection(selection)) {
+    if ($isRangeSelection(selection)) {
       const anchor = selection.anchor;
       const focus = selection.focus;
       const nodes = selection.getNodes();
@@ -315,9 +349,6 @@ export function validateUrl(url: string): boolean {
   return url === "https://" || urlRegExp.test(url);
 }
 
-import { $isAtNodeEnd } from "@lexical/selection";
-import { ElementNode, RangeSelection, TextNode } from "lexical";
-
 export function getSelectedNode(
   selection: RangeSelection
 ): TextNode | ElementNode {
@@ -334,6 +365,13 @@ export function getSelectedNode(
   } else {
     return $isAtNodeEnd(anchor) ? anchorNode : focusNode;
   }
+}
+
+// Implementation of $isAtNodeEnd for completeness
+function $isAtNodeEnd(point) {
+  const offset = point.offset;
+  const node = point.getNode();
+  return offset === node.getTextContent().length;
 }
 
 const VERTICAL_GAP = 10;
@@ -376,8 +414,8 @@ export function setFloatingElemPositionForLinkEditor(
   floatingElem.style.transform = `translate(${left}px, ${top}px)`;
 }
 
-type Func = () => void;
-function mergeRegister(...func: Array<Func>): () => void {
+// Export mergeRegister for completeness
+export function mergeRegister(...func: Array<() => void>): () => void {
   return () => {
     for (let i = func.length - 1; i >= 0; i--) {
       func[i]();

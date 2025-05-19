@@ -57,8 +57,30 @@ import {
   useToolbarState,
 } from "@/context/toolbarContext";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { $findMatchingParent, mergeRegister} from "@lexical/utils";
 
+// Define the utility functions that were previously imported from @lexical/utils
+function $findMatchingParent(
+  node,
+  predicate
+) {
+  let parent = node.getParent();
+  while (parent !== null) {
+    if (predicate(parent)) {
+      return parent;
+    }
+    parent = parent.getParent();
+  }
+  return null;
+}
+
+// Define the mergeRegister function 
+function mergeRegister(...listeners) {
+  return () => {
+    for (let i = 0; i < listeners.length; i++) {
+      listeners[i]();
+    }
+  };
+}
 
 export const Toolbar = ({ setIsLinkEditMode }) => {
     const [editor] = useLexicalComposerContext();

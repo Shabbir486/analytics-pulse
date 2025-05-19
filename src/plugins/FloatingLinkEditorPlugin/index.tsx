@@ -11,7 +11,6 @@ import {
   TOGGLE_LINK_COMMAND,
 } from "@lexical/link";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { $findMatchingParent, mergeRegister } from "@lexical/utils";
 import {
   $getSelection,
   $isLineBreakNode,
@@ -30,6 +29,30 @@ import { Dispatch, useCallback, useEffect, useRef, useState } from "react";
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { Check, CircleX, Cross, Edit2, Trash2, X } from "lucide-react";
+
+// Define the utility functions that were previously imported from @lexical/utils
+function $findMatchingParent(
+  node,
+  predicate
+) {
+  let parent = node.getParent();
+  while (parent !== null) {
+    if (predicate(parent)) {
+      return parent;
+    }
+    parent = parent.getParent();
+  }
+  return null;
+}
+
+// Define the mergeRegister function
+function mergeRegister(...listeners) {
+  return () => {
+    for (let i = 0; i < listeners.length; i++) {
+      listeners[i]();
+    }
+  };
+}
 
 function preventDefault(
   event: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLElement>
