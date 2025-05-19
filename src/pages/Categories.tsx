@@ -2,12 +2,12 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from "@/components/ui/breadcrumb";
-import { Home, List } from "lucide-react";
+import { Home } from "lucide-react";
 import { CategoriesList } from "@/components/categories/CategoriesList";
 import { fetchCategories } from '@/services/categoryService';
 import { toast } from "sonner";
 
-export default function Categories() {
+export function Categories() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -56,3 +56,5 @@ export default function Categories() {
     </div>
   );
 }
+
+export default Categories;
