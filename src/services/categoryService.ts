@@ -1,82 +1,99 @@
 
 import { Category, CategoryResponse, CreateCategoryRequest, UpdateCategoryRequest } from "@/types/category";
+import { mockCategoryResponse, mockFetchCategories } from "@/components/categories/mockData";
 
-const API_URL = "http://localhost:8080/api/categories";
+// Using mock data for now, replace with actual API calls when backend is ready
+export const fetchCategories = async (page: number, pageSize: number): Promise<CategoryResponse> => {
+  // In a production environment, you would call the API like:
+  // return fetch(`http://localhost:8080/api/categories/paging?page=${page}&size=${pageSize}`)
+  //   .then(response => response.json());
+  
+  // For now, using mock data
+  return mockFetchCategories();
+};
 
-export async function fetchCategories(page = 0, size = 10): Promise<CategoryResponse> {
-  const response = await fetch(`${API_URL}/paging?page=${page}&size=${size}`);
+export const createCategory = async (category: CreateCategoryRequest): Promise<Category> => {
+  // In a production environment:
+  // return fetch('http://localhost:8080/api/categories', {
+  //   method: 'POST',
+  //   headers: { 'Content-Type': 'application/json' },
+  //   body: JSON.stringify(category)
+  // }).then(response => response.json());
   
-  if (!response.ok) {
-    throw new Error(`Failed to fetch categories: ${response.status}`);
-  }
-  
-  return response.json();
-}
-
-export async function fetchCategoryById(id: number): Promise<Category> {
-  const response = await fetch(`${API_URL}/${id}`);
-  
-  if (!response.ok) {
-    throw new Error(`Failed to fetch category: ${response.status}`);
-  }
-  
-  return response.json();
-}
-
-export async function createCategory(category: CreateCategoryRequest): Promise<Category> {
-  const response = await fetch(`${API_URL}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(category),
+  // Mock implementation
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        id: Math.floor(Math.random() * 1000),
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        isActive: category.isActive,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    }, 500);
   });
-  
-  if (!response.ok) {
-    throw new Error(`Failed to create category: ${response.status}`);
-  }
-  
-  return response.json();
-}
+};
 
-export async function updateCategory(category: UpdateCategoryRequest): Promise<Category> {
-  const response = await fetch(`${API_URL}/${category.id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(category),
+export const updateCategory = async (category: UpdateCategoryRequest): Promise<Category> => {
+  // In a production environment:
+  // return fetch(`http://localhost:8080/api/categories/${category.id}`, {
+  //   method: 'PUT',
+  //   headers: { 'Content-Type': 'application/json' },
+  //   body: JSON.stringify(category)
+  // }).then(response => response.json());
+  
+  // Mock implementation
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        id: category.id,
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        isActive: category.isActive,
+        createdAt: null,
+        updatedAt: new Date().toISOString()
+      });
+    }, 500);
   });
-  
-  if (!response.ok) {
-    throw new Error(`Failed to update category: ${response.status}`);
-  }
-  
-  return response.json();
-}
+};
 
-export async function deleteCategory(id: number): Promise<void> {
-  const response = await fetch(`${API_URL}/${id}`, {
-    method: 'DELETE',
-  });
+export const deleteCategory = async (id: number): Promise<void> => {
+  // In a production environment:
+  // return fetch(`http://localhost:8080/api/categories/${id}`, {
+  //   method: 'DELETE'
+  // }).then(response => {
+  //   if (!response.ok) {
+  //     throw new Error('Failed to delete category');
+  //   }
+  // });
   
-  if (!response.ok) {
-    throw new Error(`Failed to delete category: ${response.status}`);
-  }
-}
+  // Mock implementation
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, 500);
+  });
+};
 
-export async function toggleCategoryStatus(id: number, isActive: boolean): Promise<Category> {
-  const response = await fetch(`${API_URL}/${id}/status`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ isActive }),
+export const toggleCategoryStatus = async (id: number, isActive: boolean): Promise<void> => {
+  // In a production environment:
+  // return fetch(`http://localhost:8080/api/categories/${id}/status`, {
+  //   method: 'PATCH',
+  //   headers: { 'Content-Type': 'application/json' },
+  //   body: JSON.stringify({ isActive })
+  // }).then(response => {
+  //   if (!response.ok) {
+  //     throw new Error('Failed to update category status');
+  //   }
+  // });
+  
+  // Mock implementation
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, 500);
   });
-  
-  if (!response.ok) {
-    throw new Error(`Failed to toggle category status: ${response.status}`);
-  }
-  
-  return response.json();
-}
+};

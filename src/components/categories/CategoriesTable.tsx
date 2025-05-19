@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { Category } from "@/types/category";
 import {
   Table,
@@ -9,29 +8,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, MoreHorizontal } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Switch } from "@/components/ui/switch";
-import { EditCategoryDialog } from "./EditCategoryDialog";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal, Edit, Trash2, Power } from "lucide-react";
 
 interface CategoriesTableProps {
   categories: Category[];
@@ -40,34 +29,12 @@ interface CategoriesTableProps {
   onToggleStatus: (id: number, currentStatus: boolean) => void;
 }
 
-export function CategoriesTable({ 
+export function CategoriesTable({
   categories,
   isLoading,
   onDelete,
-  onToggleStatus
+  onToggleStatus,
 }: CategoriesTableProps) {
-  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
-  const [categoryToEdit, setCategoryToEdit] = useState<Category | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-
-  const handleDeleteClick = (category: Category) => {
-    setCategoryToDelete(category);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = () => {
-    if (categoryToDelete) {
-      onDelete(categoryToDelete.id);
-    }
-    setIsDeleteDialogOpen(false);
-  };
-
-  const handleEditClick = (category: Category) => {
-    setCategoryToEdit(category);
-    setIsEditDialogOpen(true);
-  };
-
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "N/A";
     try {
@@ -77,127 +44,90 @@ export function CategoriesTable({
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-2">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="flex items-center space-x-4">
-            <Skeleton className="h-12 w-full" />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   return (
-    <>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[50px]">ID</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Slug</TableHead>
+            <TableHead className="hidden md:table-cell">Description</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="hidden md:table-cell">Created</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isLoading ? (
             <TableRow>
-              <TableHead className="w-[80px]">ID</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Slug</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Updated At</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableCell colSpan={7} className="h-24 text-center">
+                Loading...
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {categories.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
-                  No categories found
+          ) : categories.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} className="h-24 text-center">
+                No categories found.
+              </TableCell>
+            </TableRow>
+          ) : (
+            categories.map((category) => (
+              <TableRow key={category.id}>
+                <TableCell className="font-medium">{category.id}</TableCell>
+                <TableCell>{category.name}</TableCell>
+                <TableCell>{category.slug}</TableCell>
+                <TableCell className="hidden md:table-cell max-w-[200px] truncate">
+                  {category.description}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={category.isActive ? "success" : "destructive"}
+                  >
+                    {category.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {formatDate(category.createdAt)}
+                </TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          onToggleStatus(category.id, category.isActive)
+                        }
+                      >
+                        <Power className="mr-2 h-4 w-4" />
+                        {category.isActive ? "Deactivate" : "Activate"}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-red-600"
+                        onClick={() => onDelete(category.id)}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
-            ) : (
-              categories.map((category) => (
-                <TableRow key={category.id}>
-                  <TableCell className="font-medium">{category.id}</TableCell>
-                  <TableCell>{category.name}</TableCell>
-                  <TableCell>{category.slug}</TableCell>
-                  <TableCell className="max-w-[200px] truncate">{category.description}</TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex justify-center items-center">
-                      <Switch 
-                        checked={category.isActive} 
-                        onCheckedChange={() => onToggleStatus(category.id, category.isActive)}
-                      />
-                      <span className="ml-2">
-                        {category.isActive ? (
-                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                            Active
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                            Inactive
-                          </Badge>
-                        )}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{formatDate(category.createdAt)}</TableCell>
-                  <TableCell>{formatDate(category.updatedAt)}</TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEditClick(category)}>
-                          <Pencil className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => handleDeleteClick(category)}
-                          className="text-red-600 focus:text-red-600"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to delete this category?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the category
-              "{categoryToDelete?.name}" and remove it from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {categoryToEdit && (
-        <EditCategoryDialog
-          category={categoryToEdit}
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-        />
-      )}
-    </>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
