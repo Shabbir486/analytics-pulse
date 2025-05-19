@@ -1,3 +1,4 @@
+
 import {
   BarChart3,
   Box,
@@ -6,6 +7,7 @@ import {
   Settings,
   ShoppingCart,
   Users,
+  List,
 } from "lucide-react";
 import {
   Sidebar,
@@ -57,6 +59,11 @@ const menuItems = [
         title: "Customers",
         icon: Users,
         url: "/customers",
+      },
+      {
+        title: "Categories",
+        icon: List,
+        url: "/categories",
       }
     ],
   },
