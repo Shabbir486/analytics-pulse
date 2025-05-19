@@ -27,13 +27,13 @@ export function Categories() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/" className="flex items-center gap-2">
+              <BreadcrumbLink href="/admin" className="flex items-center gap-2">
                 <Home className="h-4 w-4" />
                 Dashboard
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/categories">Categories</BreadcrumbLink>
+              <BreadcrumbLink href="/admin/categories">Categories</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbItem>
               <BreadcrumbLink>List</BreadcrumbLink>

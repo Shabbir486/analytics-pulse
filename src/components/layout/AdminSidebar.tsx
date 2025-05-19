@@ -28,12 +28,12 @@ const menuItems = [
       {
         title: "Dashboard",
         icon: LayoutDashboard,
-        url: "/",
+        url: "/admin",
       },
       {
         title: "Analytics",
         icon: BarChart3,
-        url: "/analytics",
+        url: "/admin/analytics",
       },
     ],
   },
@@ -43,27 +43,27 @@ const menuItems = [
       {
         title: "Users",
         icon: Users,
-        url: "/users",
+        url: "/admin/users",
       },
       {
         title: "Products",
         icon: Box,
-        url: "/products",
+        url: "/admin/products",
       },
       {
         title: "Orders",
         icon: ShoppingCart,
-        url: "/orders",
+        url: "/admin/orders",
       },
       {
         title: "Customers",
         icon: Users,
-        url: "/customers",
+        url: "/admin/customers",
       },
       {
         title: "Categories",
         icon: List,
-        url: "/categories",
+        url: "/admin/categories",
       }
     ],
   },
@@ -73,7 +73,7 @@ const menuItems = [
       {
         title: "Settings",
         icon: Settings,
-        url: "/settings",
+        url: "/admin/settings",
       },
     ],
   },
