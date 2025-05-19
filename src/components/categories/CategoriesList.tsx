@@ -80,6 +80,7 @@ export function CategoriesList({
     toggleStatusMutation.mutate({ id, isActive: !currentStatus });
   };
 
+  // Apply client-side filters only to currently loaded page data
   const filteredCategories = categories.filter(category => {
     const matchesSearch = category.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          category.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -89,9 +90,60 @@ export function CategoriesList({
     return matchesSearch && category.isActive === isActiveFilter;
   });
 
+  // Render pagination controls
   const renderPagination = () => {
     const { page, pageSize, totalPages, setPage } = pagination;
     
+    // Generate page numbers to display
+    const getPageNumbers = () => {
+      const pageNumbers = [];
+      const maxButtons = 5; // Maximum number of page buttons to show
+      
+      if (totalPages <= maxButtons) {
+        // If total pages are less than max buttons, show all pages
+        for (let i = 0; i < totalPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        // Always include first page
+        pageNumbers.push(0);
+        
+        // Calculate start and end of page range around current page
+        let startPage = Math.max(1, page - 1);
+        let endPage = Math.min(totalPages - 2, page + 1);
+        
+        // Adjust if we're near the beginning
+        if (page < 2) {
+          endPage = 3;
+        }
+        
+        // Adjust if we're near the end
+        if (page > totalPages - 3) {
+          startPage = totalPages - 4;
+        }
+        
+        // Add ellipsis after first page if needed
+        if (startPage > 1) {
+          pageNumbers.push(-1); // Use -1 to represent ellipsis
+        }
+        
+        // Add page numbers around current page
+        for (let i = startPage; i <= endPage; i++) {
+          pageNumbers.push(i);
+        }
+        
+        // Add ellipsis before last page if needed
+        if (endPage < totalPages - 2) {
+          pageNumbers.push(-2); // Use -2 to represent ellipsis
+        }
+        
+        // Always include last page
+        pageNumbers.push(totalPages - 1);
+      }
+      
+      return pageNumbers;
+    };
+
     return (
       <Pagination>
         <PaginationContent>
@@ -102,19 +154,23 @@ export function CategoriesList({
             />
           </PaginationItem>
           
-          {Array.from({ length: totalPages }).map((_, index) => (
-            <PaginationItem key={index}>
-              <PaginationLink 
-                isActive={page === index}
-                onClick={() => setPage(index)}
-                className="cursor-pointer"
-              >
-                {index + 1}
-              </PaginationLink>
-            </PaginationItem>
+          {getPageNumbers().map((pageNum, index) => (
+            pageNum >= 0 ? (
+              <PaginationItem key={index}>
+                <PaginationLink 
+                  isActive={page === pageNum}
+                  onClick={() => setPage(pageNum)}
+                  className="cursor-pointer"
+                >
+                  {pageNum + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ) : (
+              <PaginationItem key={index}>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )
           ))}
-          
-          {totalPages > 7 && <PaginationEllipsis />}
           
           <PaginationItem>
             <PaginationNext 
@@ -124,6 +180,30 @@ export function CategoriesList({
           </PaginationItem>
         </PaginationContent>
       </Pagination>
+    );
+  };
+
+  // Render page size selector
+  const renderPageSizeSelector = () => {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-muted-foreground">Show</span>
+        <Select 
+          value={pagination.pageSize.toString()} 
+          onValueChange={(value) => pagination.setPageSize(Number(value))}
+        >
+          <SelectTrigger className="w-[70px]">
+            <SelectValue placeholder={pagination.pageSize.toString()} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="5">5</SelectItem>
+            <SelectItem value="10">10</SelectItem>
+            <SelectItem value="20">20</SelectItem>
+            <SelectItem value="50">50</SelectItem>
+          </SelectContent>
+        </Select>
+        <span className="text-sm text-muted-foreground">per page</span>
+      </div>
     );
   };
 
@@ -171,10 +251,14 @@ export function CategoriesList({
         onToggleStatus={handleToggleStatus}
       />
 
-      {pagination.totalPages > 1 && renderPagination()}
+      <div className="flex items-center justify-between mt-4">
+        {renderPageSizeSelector()}
+        {pagination.totalPages > 1 && renderPagination()}
+      </div>
       
       <div className="text-sm text-muted-foreground">
-        Showing {filteredCategories.length} of {pagination.totalElements} categories
+        Showing {Math.min(pagination.pageSize, filteredCategories.length)} of {pagination.totalElements} categories 
+        (Page {pagination.page + 1} of {pagination.totalPages})
       </div>
 
       <CreateCategoryDialog 

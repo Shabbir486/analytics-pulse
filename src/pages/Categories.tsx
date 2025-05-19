@@ -16,10 +16,22 @@ export function Categories() {
     queryFn: () => fetchCategories(page, pageSize),
   });
 
+  // Show error toast if query fails
   if (error) {
     toast.error("Failed to fetch categories");
     console.error("Error fetching categories:", error);
   }
+
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPage(0); // Reset to first page when changing page size
+  };
 
   return (
     <div className="space-y-6">
@@ -49,8 +61,8 @@ export function Categories() {
           pageSize,
           totalPages: data?.data.totalPages || 0,
           totalElements: data?.data.totalElements || 0,
-          setPage,
-          setPageSize
+          setPage: handlePageChange,
+          setPageSize: handlePageSizeChange
         }}
       />
     </div>
