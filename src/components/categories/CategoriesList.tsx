@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, MoreVertical, Search } from "lucide-react";
+import { Plus, MoreVertical, Search, ArrowUpDown } from "lucide-react";
 import { Category } from "@/types/category";
 import { CategoriesTable } from "./CategoriesTable";
 import { CreateCategoryDialog } from "./CreateCategoryDialog";
@@ -19,7 +18,6 @@ import {
 import { 
   Pagination, 
   PaginationContent, 
-  PaginationEllipsis, 
   PaginationItem, 
   PaginationLink, 
   PaginationNext, 
@@ -90,123 +88,6 @@ export function CategoriesList({
     return matchesSearch && category.isActive === isActiveFilter;
   });
 
-  // Render pagination controls
-  const renderPagination = () => {
-    const { page, pageSize, totalPages, setPage } = pagination;
-    
-    // Generate page numbers to display
-    const getPageNumbers = () => {
-      const pageNumbers = [];
-      const maxButtons = 5; // Maximum number of page buttons to show
-      
-      if (totalPages <= maxButtons) {
-        // If total pages are less than max buttons, show all pages
-        for (let i = 0; i < totalPages; i++) {
-          pageNumbers.push(i);
-        }
-      } else {
-        // Always include first page
-        pageNumbers.push(0);
-        
-        // Calculate start and end of page range around current page
-        let startPage = Math.max(1, page - 1);
-        let endPage = Math.min(totalPages - 2, page + 1);
-        
-        // Adjust if we're near the beginning
-        if (page < 2) {
-          endPage = 3;
-        }
-        
-        // Adjust if we're near the end
-        if (page > totalPages - 3) {
-          startPage = totalPages - 4;
-        }
-        
-        // Add ellipsis after first page if needed
-        if (startPage > 1) {
-          pageNumbers.push(-1); // Use -1 to represent ellipsis
-        }
-        
-        // Add page numbers around current page
-        for (let i = startPage; i <= endPage; i++) {
-          pageNumbers.push(i);
-        }
-        
-        // Add ellipsis before last page if needed
-        if (endPage < totalPages - 2) {
-          pageNumbers.push(-2); // Use -2 to represent ellipsis
-        }
-        
-        // Always include last page
-        pageNumbers.push(totalPages - 1);
-      }
-      
-      return pageNumbers;
-    };
-
-    return (
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious 
-              onClick={() => page > 0 && setPage(page - 1)} 
-              className={page === 0 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-            />
-          </PaginationItem>
-          
-          {getPageNumbers().map((pageNum, index) => (
-            pageNum >= 0 ? (
-              <PaginationItem key={index}>
-                <PaginationLink 
-                  isActive={page === pageNum}
-                  onClick={() => setPage(pageNum)}
-                  className="cursor-pointer"
-                >
-                  {pageNum + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ) : (
-              <PaginationItem key={index}>
-                <PaginationEllipsis />
-              </PaginationItem>
-            )
-          ))}
-          
-          <PaginationItem>
-            <PaginationNext 
-              onClick={() => page < totalPages - 1 && setPage(page + 1)}
-              className={page >= totalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    );
-  };
-
-  // Render page size selector
-  const renderPageSizeSelector = () => {
-    return (
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">Show</span>
-        <Select 
-          value={pagination.pageSize.toString()} 
-          onValueChange={(value) => pagination.setPageSize(Number(value))}
-        >
-          <SelectTrigger className="w-[70px]">
-            <SelectValue placeholder={pagination.pageSize.toString()} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="5">5</SelectItem>
-            <SelectItem value="10">10</SelectItem>
-            <SelectItem value="20">20</SelectItem>
-            <SelectItem value="50">50</SelectItem>
-          </SelectContent>
-        </Select>
-        <span className="text-sm text-muted-foreground">per page</span>
-      </div>
-    );
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -251,9 +132,66 @@ export function CategoriesList({
         onToggleStatus={handleToggleStatus}
       />
 
-      <div className="flex items-center justify-between mt-4">
-        {renderPageSizeSelector()}
-        {pagination.totalPages > 1 && renderPagination()}
+      {/* Updated pagination section to match the Products component */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 w-full">
+          <span className="text-sm text-muted-foreground">Rows per page</span>
+          <Select
+            value={String(pagination.pageSize)}
+            onValueChange={(value) => pagination.setPageSize(Number(value))}
+          >
+            <SelectTrigger className="w-[70px]">
+              <SelectValue>{pagination.pageSize}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Pagination className="w-full">
+          <PaginationContent>
+            <PaginationItem className="w-[3.6rem]">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => pagination.setPage(Math.max(0, pagination.page - 1))}
+                disabled={pagination.page === 0}
+              >
+                <PaginationPrevious />
+              </Button>
+            </PaginationItem>
+            {Array.from({ length: pagination.totalPages }, (_, i) => i).map((page) => (
+              <PaginationItem key={page}>
+                <Button
+                  variant={pagination.page === page ? "default" : "ghost"}
+                  size="icon"
+                  onClick={() => pagination.setPage(page)}
+                >
+                  {page + 1}
+                </Button>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => pagination.setPage(Math.min(pagination.totalPages - 1, pagination.page + 1))}
+                disabled={pagination.page === pagination.totalPages - 1}
+              >
+                <PaginationNext className="h-4 w-4" />
+              </Button>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+
+        <span className="text-sm text-muted-foreground w-full text-right">
+          Showing {pagination.page * pagination.pageSize + 1}-
+          {Math.min((pagination.page + 1) * pagination.pageSize, pagination.totalElements)} of {pagination.totalElements}
+        </span>
       </div>
       
       <div className="text-sm text-muted-foreground">
